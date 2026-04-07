@@ -1,0 +1,9 @@
+{
+  "name": "ocr-free",
+  "private": true,
+  "scripts": {
+    "dev": "./dev.sh",
+    "dev:back": "./run.sh",
+    "dev:front": "./run_front.sh"
+  }
+}

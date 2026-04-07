@@ -1,0 +1,16 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://resumidascuentas.com/sitemap.xml
+
+# Disallow crawling of authentication pages
+User-agent: *
+Disallow: /login
+Disallow: /register
+Disallow: /api/
+
+# Disallow crawling of admin pages
+User-agent: *
+Disallow: /admin/ 

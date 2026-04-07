@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+python-multipart
+PyMuPDF
+pymupdf4llm
+pytesseract
+Pillow
+sentence-transformers
+python-dotenv
+httpx
+numpy

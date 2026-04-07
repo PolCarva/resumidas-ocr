@@ -1,0 +1,65 @@
+{
+  "name": "Resumidas Cuentas - Finanzas Personales",
+  "short_name": "Resumidas Cuentas",
+  "description": "Analiza y categoriza automáticamente tus gastos para tomar el control de tus finanzas personales",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Ver Gastos",
+      "short_name": "Gastos",
+      "description": "Ver análisis de gastos",
+      "url": "/expenses",
+      "icons": [{ "src": "/shortcuts/expenses.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Ver Archivos",
+      "short_name": "Archivos",
+      "description": "Ver historial de archivos",
+      "url": "/files",
+      "icons": [{ "src": "/shortcuts/files.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/home.jpg",
+      "type": "image/jpeg",
+      "sizes": "1080x1920",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshots/expenses.jpg",
+      "type": "image/jpeg",
+      "sizes": "1080x1920",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshots/desktop.jpg",
+      "type": "image/jpeg",
+      "sizes": "1920x1080",
+      "form_factor": "wide"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "categories": ["finance", "productivity"],
+  "lang": "es-ES",
+  "dir": "ltr"
+} 

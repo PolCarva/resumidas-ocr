@@ -1,0 +1,2590 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Resumidas Cuentas</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #e7edf7;
+      --surface: #ffffff;
+      --surface-soft: #f8fbff;
+      --text: #1e293b;
+      --text-soft: #64748b;
+      --line: #dbe3ef;
+      --blue: #2563eb;
+      --blue-strong: #1d4ed8;
+      --green: #16a34a;
+      --red: #dc2626;
+      --shadow: 0 20px 45px -35px rgba(15, 23, 42, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Inter", "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #f0f4fb 0%, var(--bg) 100%);
+      min-height: 100%;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(8px);
+    }
+
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 34px;
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 34px;
+      min-width: 0;
+    }
+
+    .brand {
+      font-size: 43px;
+      letter-spacing: -0.02em;
+      font-weight: 800;
+      color: var(--blue);
+      text-decoration: none;
+      white-space: nowrap;
+      line-height: 1;
+      transform: scale(0.52);
+      transform-origin: left center;
+      margin-right: -120px;
+    }
+
+    .app-tabs {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      flex-wrap: wrap;
+    }
+
+    .app-tab {
+      position: relative;
+      border: 0;
+      background: transparent;
+      color: var(--text-soft);
+      font-size: 31px;
+      font-weight: 500;
+      padding: 21px 1px 19px;
+      cursor: pointer;
+      transform: scale(0.52);
+      transform-origin: left center;
+      margin-right: -58px;
+    }
+
+    .app-tab.active {
+      color: #0f172a;
+      font-weight: 600;
+    }
+
+    .app-tab.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 2px;
+      border-radius: 999px;
+      background: var(--blue);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      transform: scale(0.75);
+      transform-origin: right center;
+      margin-left: -60px;
+    }
+
+    .username {
+      font-weight: 600;
+      color: #334155;
+      min-width: 88px;
+      text-align: right;
+    }
+
+    .header-btn {
+      border-radius: 10px;
+      border: 1px solid #d5deea;
+      background: var(--surface);
+      color: #334155;
+      height: 48px;
+      padding: 0 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .header-btn:hover {
+      background: #f8fafc;
+      border-color: #c7d3e6;
+    }
+
+    .main-shell {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 26px 34px 42px;
+    }
+
+    .page {
+      display: none;
+      animation: fadeIn 0.18s ease;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .analyze-hero {
+      text-align: center;
+      padding-top: 22px;
+    }
+
+    .analyze-title {
+      margin: 0;
+      font-size: clamp(46px, 6vw, 78px);
+      line-height: 1.02;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #1e293b;
+    }
+
+    .analyze-subtitle {
+      margin: 24px auto 0;
+      max-width: 860px;
+      color: #475569;
+      font-size: clamp(20px, 2.3vw, 35px);
+      line-height: 1.3;
+      transform: scale(0.72);
+      transform-origin: top center;
+      margin-bottom: -30px;
+    }
+
+    .hero-points {
+      margin-top: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+      color: #374151;
+      font-weight: 600;
+      font-size: 34px;
+      transform: scale(0.52);
+      transform-origin: top center;
+      margin-bottom: -34px;
+    }
+
+    .hero-point {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .dot.green { background: #22c55e; }
+    .dot.blue { background: #3b82f6; }
+    .dot.purple { background: #8b5cf6; }
+
+    .analyze-card {
+      margin: 58px auto 0;
+      max-width: 770px;
+      background: #f8fafc;
+      border: 2px dashed #d6deea;
+      border-radius: 18px;
+      padding: 44px 28px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.18s ease, transform 0.12s ease, background 0.2s ease;
+    }
+
+    .analyze-card::before {
+      content: "";
+      position: absolute;
+      left: -35px;
+      top: -35px;
+      width: 95px;
+      height: 95px;
+      background: rgba(226, 232, 240, 0.85);
+      border-radius: 50%;
+    }
+
+    .analyze-card::after {
+      content: "";
+      position: absolute;
+      right: -50px;
+      bottom: -50px;
+      width: 120px;
+      height: 120px;
+      background: rgba(226, 232, 240, 0.75);
+      border-radius: 50%;
+    }
+
+    .analyze-card:hover,
+    .analyze-card.dragover {
+      border-color: #9db8ea;
+      background: #fdfefe;
+      transform: translateY(-1px);
+    }
+
+    .analyze-card-icon {
+      position: relative;
+      margin: 0 auto 18px;
+      width: 78px;
+      height: 78px;
+      border-radius: 999px;
+      background: #eef2f7;
+      display: grid;
+      place-items: center;
+      color: #6b7280;
+    }
+
+    .analyze-card h2 {
+      position: relative;
+      margin: 0;
+      text-align: center;
+      font-weight: 700;
+      font-size: 26px;
+      transform: scale(0.78);
+      transform-origin: center;
+      color: #1f2937;
+    }
+
+    .analyze-card p {
+      position: relative;
+      margin: 10px 0 0;
+      text-align: center;
+      color: #6b7280;
+      font-size: 20px;
+      transform: scale(0.72);
+      transform-origin: top center;
+    }
+
+    .picked-file {
+      margin: 14px auto 0;
+      max-width: 770px;
+      min-height: 26px;
+      text-align: center;
+      font-size: 14px;
+      color: #334155;
+      font-weight: 600;
+    }
+
+    .analyze-actions {
+      margin-top: 24px;
+      text-align: center;
+    }
+
+    .analyze-btn {
+      border: 0;
+      border-radius: 14px;
+      min-width: 270px;
+      height: 58px;
+      padding: 0 24px;
+      font-weight: 700;
+      font-size: 22px;
+      transform: scale(0.72);
+      transform-origin: center;
+      background: #c8d3e8;
+      color: #8491a9;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.15s ease, color 0.2s ease;
+    }
+
+    .analyze-btn.enabled {
+      background: var(--blue);
+      color: #fff;
+      box-shadow: 0 16px 34px -22px rgba(37, 99, 235, 0.8);
+    }
+
+    .analyze-btn.enabled:hover {
+      background: var(--blue-strong);
+    }
+
+    .analyze-btn:disabled {
+      cursor: not-allowed;
+    }
+
+    .analyze-status {
+      margin-top: 10px;
+      text-align: center;
+      color: var(--text-soft);
+      min-height: 22px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .gastos-empty {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      color: #475569;
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .currency-switch {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 2px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+
+    .currency-pill {
+      border: 1px solid transparent;
+      border-radius: 999px;
+      background: transparent;
+      color: #6b7280;
+      font-weight: 600;
+      font-size: 14px;
+      height: 36px;
+      padding: 0 18px;
+      cursor: pointer;
+    }
+
+    .currency-pill.active {
+      background: #111827;
+      color: #fff;
+    }
+
+    .gastos-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .gastos-title {
+      margin: 0;
+      font-size: clamp(31px, 4.8vw, 52px);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      font-weight: 800;
+      transform: scale(0.56);
+      transform-origin: left center;
+      margin-right: -210px;
+    }
+
+    .gastos-sub {
+      margin-top: 6px;
+      color: #64748b;
+      font-size: 17px;
+      transform: scale(0.7);
+      transform-origin: left top;
+      margin-bottom: -10px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(130px, 1fr));
+      gap: 10px;
+      min-width: 420px;
+      transform: scale(0.74);
+      transform-origin: right center;
+      margin-left: -70px;
+    }
+
+    .kpi-card {
+      border-radius: 14px;
+      padding: 14px 16px;
+      border: 1px solid #dbe3ef;
+      background: #eff6ff;
+    }
+
+    .kpi-card.green {
+      background: #ecfdf3;
+      border-color: #d7f3df;
+    }
+
+    .kpi-card.teal {
+      background: #e8f7f1;
+      border-color: #d4ede5;
+    }
+
+    .kpi-label {
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .kpi-value {
+      margin-top: 4px;
+      font-size: 35px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      transform: scale(0.56);
+      transform-origin: left top;
+      margin-bottom: -16px;
+    }
+
+    .kpi-value.blue { color: #1d4ed8; }
+    .kpi-value.green { color: #15803d; }
+    .kpi-value.teal { color: #0f766e; }
+
+    .chip-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .chip {
+      border: 1px solid #d6deea;
+      border-radius: 10px;
+      background: #fff;
+      height: 36px;
+      padding: 0 16px;
+      color: #334155;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .chip.active {
+      background: #111827;
+      border-color: #111827;
+      color: #fff;
+    }
+
+    .chip.soft-active {
+      background: #eef2f8;
+      border-color: #dbe3ef;
+      color: #1f2937;
+    }
+
+    .chart-layout {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .chart-card,
+    .summary-card,
+    .table-card {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.84);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .chart-card {
+      padding: 18px 22px;
+      min-height: 380px;
+    }
+
+    .summary-card {
+      padding: 18px 22px;
+      min-height: 380px;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 23px;
+      font-weight: 800;
+      transform: scale(0.72);
+      transform-origin: left top;
+      margin-bottom: -10px;
+    }
+
+    .chart-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 8px;
+    }
+
+    .chart-kind {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .kind-btn {
+      border: 1px solid #d6deea;
+      background: #fff;
+      color: #334155;
+      border-radius: 10px;
+      height: 34px;
+      padding: 0 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .kind-btn.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .chart-wrap {
+      height: 300px;
+      display: grid;
+      place-items: center;
+    }
+
+    .summary-list {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 316px;
+      overflow: auto;
+    }
+
+    .summary-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-weight: 700;
+    }
+
+    .summary-left {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .summary-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      flex: 0 0 auto;
+    }
+
+    .summary-name {
+      font-size: 24px;
+      transform: scale(0.52);
+      transform-origin: left center;
+      margin-right: -110px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .summary-value {
+      font-size: 24px;
+      transform: scale(0.54);
+      transform-origin: right center;
+      white-space: nowrap;
+      margin-left: -100px;
+    }
+
+    .table-card {
+      padding: 18px 20px;
+    }
+
+    .table-head {
+      margin: 0 0 10px;
+      font-size: 36px;
+      transform: scale(0.52);
+      transform-origin: left center;
+      margin-right: -210px;
+      font-weight: 800;
+      color: #1d4ed8;
+    }
+
+    .table-toolbar {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .input,
+    .select {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid #d6deea;
+      background: #fff;
+      height: 40px;
+      padding: 0 12px;
+      color: #1f2937;
+    }
+
+    .input:focus,
+    .select:focus {
+      outline: 2px solid rgba(37, 99, 235, 0.2);
+      border-color: #8fb1ea;
+    }
+
+    .table-wrap {
+      border: 1px solid #dbe3ef;
+      border-radius: 14px;
+      overflow: auto;
+      background: #fff;
+    }
+
+    table {
+      border-collapse: collapse;
+      min-width: 880px;
+      width: 100%;
+    }
+
+    th,
+    td {
+      padding: 12px 10px;
+      border-top: 1px solid #eff3f8;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      border-top: 0;
+      background: #f8fbff;
+      color: #64748b;
+      font-weight: 700;
+    }
+
+    td.right,
+    th.right {
+      text-align: right;
+    }
+
+    .row-description {
+      font-weight: 600;
+      color: #334155;
+      max-width: 360px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .amount-debit {
+      color: #1d4ed8;
+      font-weight: 700;
+    }
+
+    .amount-credit {
+      color: #15803d;
+      font-weight: 700;
+    }
+
+    .cat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      border: 1px solid #d5dff0;
+      background: #f8fafc;
+      padding: 4px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+      max-width: 260px;
+    }
+
+    .cat-pill-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      flex: 0 0 auto;
+    }
+
+    .cat-edit-btn {
+      border: 0;
+      background: transparent;
+      color: #6b7280;
+      cursor: pointer;
+      padding: 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    .archivos-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .archivos-title {
+      margin: 0;
+      font-size: 55px;
+      transform: scale(0.56);
+      transform-origin: left center;
+      margin-right: -200px;
+      letter-spacing: -0.02em;
+      font-weight: 800;
+      color: #1f2937;
+    }
+
+    .primary-btn {
+      border: 0;
+      border-radius: 12px;
+      height: 48px;
+      padding: 0 20px;
+      background: var(--blue);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 16px 30px -24px rgba(37, 99, 235, 0.85);
+    }
+
+    .primary-btn:hover {
+      background: var(--blue-strong);
+    }
+
+    .tip-box {
+      border: 1px solid #cfdcf3;
+      background: #edf4ff;
+      border-radius: 12px;
+      color: #1d4ed8;
+      font-weight: 700;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      font-size: 15px;
+    }
+
+    .files-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .file-card {
+      border: 1px solid #dbe3ef;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: 28px 56px 1fr auto;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .file-card.dragging {
+      opacity: 0.55;
+    }
+
+    .file-card.drag-top {
+      box-shadow: 0 -3px 0 0 var(--blue), var(--shadow);
+    }
+
+    .file-card.drag-bottom {
+      box-shadow: 0 3px 0 0 var(--blue), var(--shadow);
+    }
+
+    .drag-handle {
+      cursor: grab;
+      color: #94a3b8;
+      font-weight: 700;
+      font-size: 22px;
+      text-align: center;
+      user-select: none;
+      line-height: 1;
+    }
+
+    .file-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(59, 130, 246, 0.18);
+      color: var(--tile-fg, #2563eb);
+      background: var(--tile-bg, #dbeafe);
+    }
+
+    .file-main {
+      min-width: 0;
+      cursor: pointer;
+    }
+
+    .file-main h3 {
+      margin: 0;
+      font-size: 20px;
+      transform: scale(0.74);
+      transform-origin: left top;
+      margin-bottom: -7px;
+      font-weight: 800;
+      color: #1e293b;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .file-meta {
+      margin-top: 2px;
+      color: #64748b;
+      font-size: 14px;
+      transform: scale(0.78);
+      transform-origin: left top;
+      margin-bottom: -5px;
+    }
+
+    .file-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .ghost-btn {
+      border-radius: 10px;
+      border: 1px solid #d6deea;
+      background: #fff;
+      color: #334155;
+      height: 38px;
+      padding: 0 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .ghost-btn:hover {
+      background: #f8fafc;
+    }
+
+    .danger-btn {
+      border-color: #fecaca;
+      color: #dc2626;
+    }
+
+    .files-empty {
+      border: 1px dashed #c9d8ef;
+      border-radius: 14px;
+      text-align: center;
+      padding: 28px;
+      color: #64748b;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .modal {
+      border: 0;
+      border-radius: 18px;
+      padding: 0;
+      width: min(620px, calc(100vw - 24px));
+      background: #fff;
+      box-shadow: 0 28px 60px -26px rgba(15, 23, 42, 0.42);
+    }
+
+    .modal::backdrop {
+      background: rgba(15, 23, 42, 0.58);
+    }
+
+    .modal-box {
+      padding: 20px 24px 22px;
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .modal-head h3 {
+      margin: 0;
+      font-size: 41px;
+      transform: scale(0.55);
+      transform-origin: left center;
+      margin-right: -165px;
+      font-weight: 800;
+    }
+
+    .modal-sub {
+      margin: 0;
+      color: #64748b;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .close-btn {
+      border: 1px solid #d6deea;
+      background: #fff;
+      color: #334155;
+      border-radius: 10px;
+      width: 34px;
+      height: 34px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .form-grid {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      align-items: center;
+      gap: 12px 14px;
+    }
+
+    .form-grid label {
+      color: #334155;
+      font-weight: 700;
+    }
+
+    .color-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      flex-wrap: wrap;
+    }
+
+    .color-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      background: var(--tile-bg, #dbeafe);
+      color: var(--tile-fg, #2563eb);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+
+    .color-btn.active {
+      border-color: #3b82f6;
+    }
+
+    .preview-box {
+      border: 1px solid #dbe3ef;
+      border-radius: 12px;
+      margin-top: 12px;
+      padding: 12px 12px;
+      background: #f8fafc;
+    }
+
+    .preview-label {
+      color: #475569;
+      font-weight: 700;
+      margin-top: 18px;
+      margin-bottom: 8px;
+    }
+
+    .modal-actions {
+      margin-top: 16px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .auth-actions {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .auth-msg {
+      margin-top: 10px;
+      color: #64748b;
+      min-height: 22px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 26px;
+      transform: translateX(-50%) translateY(20px);
+      border-radius: 12px;
+      padding: 10px 16px;
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 90;
+      background: #111827;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.error {
+      background: #b91c1c;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 1180px) {
+      .chart-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .kpi-grid {
+        transform: none;
+        margin-left: 0;
+        min-width: 0;
+      }
+
+      .gastos-head {
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 920px) {
+      .header-inner {
+        height: auto;
+        padding-top: 12px;
+        padding-bottom: 10px;
+        flex-wrap: wrap;
+      }
+
+      .header-left {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .brand,
+      .app-tab,
+      .header-right,
+      .hero-points,
+      .analyze-title,
+      .analyze-subtitle,
+      .analyze-btn,
+      .gastos-title,
+      .table-head,
+      .archivos-title {
+        transform: none;
+        margin: 0;
+      }
+
+      .analyze-subtitle {
+        margin-top: 12px;
+      }
+
+      .analyze-btn {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .file-card {
+        grid-template-columns: 24px 48px 1fr;
+      }
+
+      .file-actions {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+      }
+
+      .table-toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-left">
+        <a href="#" class="brand">Resumidas Cuentas</a>
+        <nav class="app-tabs" aria-label="Navegación principal">
+          <button class="app-tab active" data-tab="analizar">Analizar</button>
+          <button class="app-tab" data-tab="gastos">Gastos</button>
+          <button class="app-tab" data-tab="archivos">Archivos</button>
+        </nav>
+      </div>
+      <div class="header-right">
+        <div class="username" id="userName">Invitado</div>
+        <button class="header-btn" id="btnOpenAuth">Iniciar sesión</button>
+        <button class="header-btn" id="btnLogout" hidden>Cerrar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-shell">
+    <section class="page active" id="page-analizar">
+      <div class="analyze-hero">
+        <h1 class="analyze-title">Resumidas Cuentas</h1>
+        <p class="analyze-subtitle">
+          Analiza y categoriza automáticamente tus gastos para tomar el control de tus finanzas personales
+        </p>
+        <div class="hero-points">
+          <span class="hero-point"><span class="dot green"></span>Fácil de usar</span>
+          <span class="hero-point"><span class="dot blue"></span>Categorización automática</span>
+          <span class="hero-point"><span class="dot purple"></span>Gráficos interactivos</span>
+        </div>
+      </div>
+
+      <div class="analyze-card" id="dropArea">
+        <div class="analyze-card-icon" aria-hidden="true">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+            <path d="M12 3v12" stroke-linecap="round" />
+            <path d="m7 8 5-5 5 5" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M20 15v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4" stroke-linecap="round" />
+          </svg>
+        </div>
+        <h2 id="dropTitle">Arrastra y suelta tu extracto bancario</h2>
+        <p>O haz clic para seleccionar un archivo PDF o CSV</p>
+        <input class="sr-only" id="fileInput" type="file" accept=".pdf,.png,.jpg,.jpeg,.gif,.bmp,.tiff,.tif,.webp" />
+      </div>
+      <div class="picked-file" id="pickedFile"></div>
+      <div class="analyze-actions">
+        <button class="analyze-btn" id="btnAnalyze" disabled>Analizar Gastos →</button>
+      </div>
+      <div class="analyze-status" id="analyzeStatus"></div>
+    </section>
+
+    <section class="page" id="page-gastos">
+      <div id="gastosEmpty" class="gastos-empty">
+        No hay análisis cargado todavía. Ve a <strong>Analizar</strong>, sube un extracto y cuando termine lo vas a ver acá.
+      </div>
+
+      <div id="gastosContent" hidden>
+        <div class="currency-switch" id="currencySwitch"></div>
+
+        <div class="gastos-head">
+          <div>
+            <h1 class="gastos-title" id="gastosTitle">Resumen de Gastos e Ingresos</h1>
+            <div class="gastos-sub" id="gastosSub">Débitos y créditos del período</div>
+          </div>
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-label">Total Gastos</div>
+              <div class="kpi-value blue" id="kpiGastos">—</div>
+            </div>
+            <div class="kpi-card green">
+              <div class="kpi-label">Total Ingresos</div>
+              <div class="kpi-value green" id="kpiIngresos">—</div>
+            </div>
+            <div class="kpi-card teal">
+              <div class="kpi-label">Balance Neto</div>
+              <div class="kpi-value teal" id="kpiBalance">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chip-row" id="movementFilterRow">
+          <button class="chip active" data-move="all">Todos</button>
+          <button class="chip" data-move="debit">Débitos (Gastos)</button>
+          <button class="chip" data-move="credit">Créditos (Ingresos)</button>
+        </div>
+
+        <div class="chip-row" id="chartModeRow">
+          <button class="chip soft-active" data-mode="category">Por Categoría</button>
+          <button class="chip" data-mode="debit_credit">Débitos vs Créditos</button>
+          <button class="chip" data-mode="running_net">Neto Acumulado</button>
+        </div>
+
+        <div class="chart-layout">
+          <section class="chart-card">
+            <div class="chart-head">
+              <h3 class="panel-title" id="chartTitle">Distribución</h3>
+              <div class="chart-kind" id="chartKindRow">
+                <button class="kind-btn active" data-kind="debit">Gastos</button>
+                <button class="kind-btn" data-kind="credit">Ingresos</button>
+              </div>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="gastosChart"></canvas>
+            </div>
+          </section>
+
+          <section class="summary-card">
+            <h3 class="panel-title">Resumen por Categoría</h3>
+            <div class="summary-list" id="categorySummary"></div>
+          </section>
+        </div>
+
+        <section class="table-card">
+          <h3 class="table-head">Tabla de Movimientos</h3>
+          <div class="table-toolbar">
+            <input class="input" id="searchInput" placeholder="Buscar transacción..." />
+            <select class="select" id="categoryFilterSelect">
+              <option value="all">Todas las categorías</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Descripción</th>
+                  <th>Categoría</th>
+                  <th class="right">Monto</th>
+                </tr>
+              </thead>
+              <tbody id="transactionsBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="page" id="page-archivos">
+      <div class="archivos-head">
+        <h1 class="archivos-title">Historial de Análisis</h1>
+        <button class="primary-btn" id="btnGoAnalyze">Analizar Nuevo Extracto</button>
+      </div>
+
+      <div class="tip-box">
+        Consejo: Puedes arrastrar los análisis para reordenarlos según tus preferencias.
+      </div>
+
+      <div class="files-empty" id="filesEmpty">
+        Inicia sesión para ver y administrar tus análisis guardados.
+      </div>
+
+      <div class="files-list" id="filesList"></div>
+    </section>
+  </main>
+
+  <dialog class="modal" id="authModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>Acceso</h3>
+        <button class="close-btn" id="btnCloseAuth">×</button>
+      </div>
+      <p class="modal-sub">Inicia sesión o crea una cuenta para guardar tu historial de análisis.</p>
+
+      <div class="form-grid">
+        <label for="authEmail">Email</label>
+        <input class="input" id="authEmail" type="email" autocomplete="email" placeholder="tu@email.com" />
+        <label for="authPassword">Password</label>
+        <input class="input" id="authPassword" type="password" autocomplete="current-password" placeholder="mínimo 8 caracteres" />
+      </div>
+
+      <div class="auth-actions">
+        <button class="primary-btn" id="btnLogin">Login</button>
+        <button class="ghost-btn" id="btnRegister">Crear cuenta</button>
+      </div>
+      <div class="auth-msg" id="authMsg"></div>
+    </div>
+  </dialog>
+
+  <dialog class="modal" id="fileEditModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>Editar análisis</h3>
+        <button class="close-btn" id="btnCloseFileEdit">×</button>
+      </div>
+      <p class="modal-sub">Personaliza el nombre, icono y color de tu análisis financiero.</p>
+
+      <div class="form-grid">
+        <label for="editFileName">Nombre</label>
+        <input class="input" id="editFileName" type="text" />
+
+        <label for="editFileIcon">Icono</label>
+        <select class="select" id="editFileIcon"></select>
+
+        <label>Color</label>
+        <div class="color-row" id="editColorRow"></div>
+      </div>
+
+      <div class="preview-label">Vista previa:</div>
+      <div class="preview-box">
+        <div class="file-card" style="grid-template-columns: 56px 1fr;">
+          <div class="file-icon" id="editPreviewIcon"></div>
+          <div class="file-main" style="cursor: default;">
+            <h3 id="editPreviewTitle">—</h3>
+            <div class="file-meta" id="editPreviewMeta">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="ghost-btn" id="btnCancelFileEdit">Cancelar</button>
+        <button class="primary-btn" id="btnSaveFileEdit">Guardar cambios</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="modal" id="categoryModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>Editar categoría</h3>
+        <button class="close-btn" id="btnCloseCategoryModal">×</button>
+      </div>
+      <p class="modal-sub" id="categoryModalText">Selecciona una categoría.</p>
+      <div class="form-grid" style="margin-top: 12px;">
+        <label for="categorySelect">Categoría</label>
+        <select class="select" id="categorySelect"></select>
+      </div>
+      <div class="modal-actions">
+        <button class="ghost-btn" id="btnCancelCategoryEdit">Cancelar</button>
+        <button class="primary-btn" id="btnSaveCategoryEdit">Guardar</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const $$ = (s) => [...document.querySelectorAll(s)];
+
+    const TOKEN_KEY = "ocrfree.token";
+    const DEFAULT_ICON = "bar-chart-3";
+    const DEFAULT_COLOR = "blue";
+
+    const CATEGORY_PALETTE = {
+      "Alimentación": "#3b82f6",
+      "Transporte": "#0ea5e9",
+      "Salud": "#ef4444",
+      "Entretenimiento": "#8b5cf6",
+      "Servicios básicos": "#f97316",
+      "Educación": "#a855f7",
+      "Vivienda": "#0f766e",
+      "Vestimenta": "#ec4899",
+      "Transferencia": "#0f766e",
+      "Retiro de efectivo": "#7c3aed",
+      "Seguros": "#6366f1",
+      "Impuestos y tasas": "#ca8a04",
+      "Ingresos": "#16a34a",
+      "Suscripciones": "#db2777",
+      "Tecnología": "#475569",
+      "Otros": "#64748b",
+    };
+
+    const ALL_CATEGORIES = Object.keys(CATEGORY_PALETTE);
+
+    const FILE_COLORS = {
+      blue: { bg: "#dbeafe", fg: "#2563eb", dot: "#3b82f6" },
+      purple: { bg: "#ede9fe", fg: "#7c3aed", dot: "#8b5cf6" },
+      green: { bg: "#dcfce7", fg: "#16a34a", dot: "#22c55e" },
+      amber: { bg: "#fef3c7", fg: "#ca8a04", dot: "#eab308" },
+      red: { bg: "#fee2e2", fg: "#dc2626", dot: "#ef4444" },
+      indigo: { bg: "#e0e7ff", fg: "#4f46e5", dot: "#6366f1" },
+      pink: { bg: "#fce7f3", fg: "#db2777", dot: "#ec4899" },
+    };
+
+    const FILE_ICONS = [
+      { id: "bar-chart-3", label: "Gráfico de Barras" },
+      { id: "line-chart", label: "Gráfico de Línea" },
+      { id: "receipt", label: "Recibo" },
+      { id: "wallet", label: "Billetera" },
+      { id: "shopping-cart", label: "Carrito" },
+      { id: "utensils", label: "Restaurante" },
+      { id: "file-text", label: "Documento" },
+    ];
+
+    const state = {
+      token: localStorage.getItem(TOKEN_KEY),
+      user: null,
+      currentFile: null,
+      currentResult: null,
+      currentFileRecordId: null,
+      files: [],
+      selectedTab: "analizar",
+      selectedCurrency: "UYU",
+      movementFilter: "all",
+      chartMode: "category",
+      chartKind: "debit",
+      search: "",
+      categoryFilter: "all",
+      chart: null,
+      editingFile: null,
+      editingColor: DEFAULT_COLOR,
+      editingCategoryTx: null,
+      draggingFileId: null,
+      pendingOrderIds: null,
+    };
+
+    const dropArea = $("#dropArea");
+    const fileInput = $("#fileInput");
+    const dropTitle = $("#dropTitle");
+    const pickedFile = $("#pickedFile");
+    const btnAnalyze = $("#btnAnalyze");
+    const analyzeStatus = $("#analyzeStatus");
+
+    const pageAnalizar = $("#page-analizar");
+    const pageGastos = $("#page-gastos");
+    const pageArchivos = $("#page-archivos");
+    const gastosEmpty = $("#gastosEmpty");
+    const gastosContent = $("#gastosContent");
+    const currencySwitch = $("#currencySwitch");
+    const gastosTitle = $("#gastosTitle");
+    const gastosSub = $("#gastosSub");
+    const kpiGastos = $("#kpiGastos");
+    const kpiIngresos = $("#kpiIngresos");
+    const kpiBalance = $("#kpiBalance");
+    const chartTitle = $("#chartTitle");
+    const chartKindRow = $("#chartKindRow");
+    const categorySummary = $("#categorySummary");
+    const searchInput = $("#searchInput");
+    const categoryFilterSelect = $("#categoryFilterSelect");
+    const transactionsBody = $("#transactionsBody");
+
+    const filesEmpty = $("#filesEmpty");
+    const filesList = $("#filesList");
+    const btnGoAnalyze = $("#btnGoAnalyze");
+
+    const authModal = $("#authModal");
+    const btnOpenAuth = $("#btnOpenAuth");
+    const btnCloseAuth = $("#btnCloseAuth");
+    const btnLogout = $("#btnLogout");
+    const authEmail = $("#authEmail");
+    const authPassword = $("#authPassword");
+    const btnLogin = $("#btnLogin");
+    const btnRegister = $("#btnRegister");
+    const authMsg = $("#authMsg");
+    const userName = $("#userName");
+
+    const fileEditModal = $("#fileEditModal");
+    const btnCloseFileEdit = $("#btnCloseFileEdit");
+    const btnCancelFileEdit = $("#btnCancelFileEdit");
+    const btnSaveFileEdit = $("#btnSaveFileEdit");
+    const editFileName = $("#editFileName");
+    const editFileIcon = $("#editFileIcon");
+    const editColorRow = $("#editColorRow");
+    const editPreviewIcon = $("#editPreviewIcon");
+    const editPreviewTitle = $("#editPreviewTitle");
+    const editPreviewMeta = $("#editPreviewMeta");
+
+    const categoryModal = $("#categoryModal");
+    const btnCloseCategoryModal = $("#btnCloseCategoryModal");
+    const btnCancelCategoryEdit = $("#btnCancelCategoryEdit");
+    const btnSaveCategoryEdit = $("#btnSaveCategoryEdit");
+    const categoryModalText = $("#categoryModalText");
+    const categorySelect = $("#categorySelect");
+
+    const toast = $("#toast");
+
+    function esc(s) {
+      return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function showToast(message, isError = false, ms = 2500) {
+      toast.textContent = message;
+      toast.classList.toggle("error", !!isError);
+      toast.classList.add("show");
+      window.clearTimeout(showToast._t);
+      showToast._t = window.setTimeout(() => toast.classList.remove("show"), ms);
+    }
+
+    function setAuthMessage(message, isError = false) {
+      authMsg.textContent = message;
+      authMsg.style.color = isError ? "var(--red)" : "var(--text-soft)";
+    }
+
+    function getPalette(colorName) {
+      return FILE_COLORS[colorName] || FILE_COLORS[DEFAULT_COLOR];
+    }
+
+    function iconSvg(iconId) {
+      if (iconId === "line-chart") {
+        return '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      }
+      if (iconId === "receipt") {
+        return '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 3h16v18l-2-1.5L16 21l-2-1.5L12 21l-2-1.5L8 21l-2-1.5L4 21V3z"/><path d="M8 8h8M8 12h8M8 16h5" stroke-linecap="round"/></svg>';
+      }
+      if (iconId === "wallet") {
+        return '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18v10H3z"/><path d="M17 12h4"/><path d="M3 7V5a2 2 0 0 1 2-2h12" stroke-linecap="round"/></svg>';
+      }
+      if (iconId === "shopping-cart") {
+        return '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="20" r="1"/><circle cx="17" cy="20" r="1"/><path d="M3 4h2l2.6 10.4a2 2 0 0 0 1.94 1.6h8.72a2 2 0 0 0 1.94-1.52L22 7H7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      }
+      if (iconId === "utensils") {
+        return '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 3v8"/><path d="M8 3v8"/><path d="M6 11v10"/><path d="M14 3v8a2 2 0 0 0 4 0V3"/><path d="M18 11v10"/></svg>';
+      }
+      if (iconId === "file-text") {
+        return '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h8M8 9h3" stroke-linecap="round"/></svg>';
+      }
+      return '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14v4M12 10v8M17 6v12" stroke-linecap="round"/></svg>';
+    }
+
+    function formatDate(isoText) {
+      if (!isoText) return "—";
+      const d = new Date(isoText);
+      if (Number.isNaN(d.getTime())) return isoText;
+      return d.toLocaleDateString("es-UY", { year: "numeric", month: "long", day: "2-digit" });
+    }
+
+    function formatDateTime(isoText) {
+      if (!isoText) return "—";
+      const d = new Date(isoText);
+      if (Number.isNaN(d.getTime())) return isoText;
+      return d.toLocaleDateString("es-UY", { year: "numeric", month: "long", day: "2-digit" });
+    }
+
+    function normalizeCurrency(raw) {
+      const text = String(raw || "").toUpperCase();
+      if (text.includes("USD") || text.includes("US.D")) return "USD";
+      return "UYU";
+    }
+
+    function parseAmount(raw) {
+      const text = String(raw || "").trim();
+      if (!text) return 0;
+      const clean = text.replace(/\./g, "").replace(",", ".").replace(/[^\d.-]/g, "");
+      const num = Number(clean);
+      return Number.isFinite(num) ? num : 0;
+    }
+
+    function fmtMoney(value, currency) {
+      const cur = currency === "USD" ? "USD" : "UYU";
+      return value.toLocaleString("es-UY", {
+        style: "currency",
+        currency: cur,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    }
+
+    function monthNameFromToken(token) {
+      const map = {
+        JAN: "Enero",
+        FEB: "Febrero",
+        MAR: "Marzo",
+        APR: "Abril",
+        MAY: "Mayo",
+        JUN: "Junio",
+        JUL: "Julio",
+        AUG: "Agosto",
+        SEP: "Setiembre",
+        OCT: "Octubre",
+        NOV: "Noviembre",
+        DEC: "Diciembre",
+      };
+      return map[token] || token;
+    }
+
+    function guessTitleFromResult(ocrResult) {
+      const md = String(ocrResult?.md_results || "");
+      const m = md.match(/\b\d{2}([A-Z]{3})(\d{4})\b/);
+      if (!m) return "Resumen";
+      return `Resumen de ${monthNameFromToken(m[1])} ${m[2]}`;
+    }
+
+    function guessStatementDateToken(ocrResult) {
+      const md = String(ocrResult?.md_results || "");
+      const m = md.match(/\b\d{2}[A-Z]{3}\d{4}\b/);
+      return m ? m[0] : null;
+    }
+
+    function getToken() {
+      return state.token;
+    }
+
+    function setToken(token) {
+      state.token = token || null;
+      if (state.token) {
+        localStorage.setItem(TOKEN_KEY, state.token);
+      } else {
+        localStorage.removeItem(TOKEN_KEY);
+      }
+      updateAuthHeader();
+    }
+
+    function updateAuthHeader() {
+      const isAuth = !!state.user;
+      userName.textContent = isAuth ? displayNameFromUser(state.user) : "Invitado";
+      btnOpenAuth.hidden = isAuth;
+      btnLogout.hidden = !isAuth;
+      filesEmpty.textContent = isAuth
+        ? "Todavía no hay análisis guardados para esta cuenta."
+        : "Inicia sesión para ver y administrar tus análisis guardados.";
+    }
+
+    function displayNameFromUser(user) {
+      const email = String(user?.email || "");
+      if (!email) return "Usuario";
+      return email.split("@")[0] || "Usuario";
+    }
+
+    async function apiJson(path, options = {}) {
+      const headers = { ...(options.headers || {}) };
+      const token = getToken();
+      if (token) headers.Authorization = `Bearer ${token}`;
+      const res = await fetch(path, { ...options, headers });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (res.status === 401) {
+          setToken(null);
+          state.user = null;
+          updateAuthHeader();
+        }
+        const msg = data?.detail || data?.error || `HTTP ${res.status}`;
+        throw new Error(msg);
+      }
+      return data;
+    }
+
+    function switchTab(tab) {
+      state.selectedTab = tab;
+      $$(".app-tab").forEach((btn) => btn.classList.toggle("active", btn.dataset.tab === tab));
+      pageAnalizar.classList.toggle("active", tab === "analizar");
+      pageGastos.classList.toggle("active", tab === "gastos");
+      pageArchivos.classList.toggle("active", tab === "archivos");
+      if (tab === "archivos") {
+        refreshFiles().catch((err) => showToast(`Error cargando archivos: ${err.message}`, true, 3500));
+      }
+    }
+
+    function setAnalyzeBusy(isBusy, text = "") {
+      btnAnalyze.disabled = isBusy || !state.currentFile;
+      btnAnalyze.classList.toggle("enabled", !btnAnalyze.disabled);
+      analyzeStatus.textContent = text || "";
+    }
+
+    function setPickedFile(file) {
+      state.currentFile = file || null;
+      if (file) {
+        dropTitle.textContent = "Archivo seleccionado";
+        pickedFile.textContent = file.name;
+      } else {
+        dropTitle.textContent = "Arrastra y suelta tu extracto bancario";
+        pickedFile.textContent = "";
+      }
+      btnAnalyze.disabled = !file;
+      btnAnalyze.classList.toggle("enabled", !!file);
+    }
+
+    function handleFileSelect(file) {
+      if (!file) return;
+      setPickedFile(file);
+      state.currentResult = null;
+      state.currentFileRecordId = null;
+      renderExpenses();
+    }
+
+    async function analyzeCurrentFile() {
+      if (!state.currentFile) return;
+
+      setAnalyzeBusy(true, "Procesando OCR...");
+      const formData = new FormData();
+      formData.append("file", state.currentFile);
+
+      try {
+        const ocrRes = await fetch("/api/ocr", { method: "POST", body: formData });
+        const ocrData = await ocrRes.json().catch(() => ({}));
+        if (!ocrRes.ok) {
+          throw new Error(ocrData?.error || "No se pudo procesar el archivo");
+        }
+
+        setAnalyzeBusy(true, "Categorizando movimientos...");
+        const categorized = await apiJson("/api/categorize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ structured_data: ocrData.structured_data || [] }),
+        });
+
+        state.currentResult = {
+          ocr_result: ocrData,
+          categorized_result: categorized,
+          title: guessTitleFromResult(ocrData),
+          statement_date: guessStatementDateToken(ocrData),
+          source: "ocr_free_v1",
+        };
+        state.currentFileRecordId = null;
+
+        let savedId = null;
+        if (state.user) {
+          setAnalyzeBusy(true, "Guardando en tu historial...");
+          const saveOut = await apiJson("/api/files", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title: state.currentResult.title,
+              statement_date: state.currentResult.statement_date,
+              source: state.currentResult.source,
+              icon: DEFAULT_ICON,
+              color: DEFAULT_COLOR,
+              ocr_result: ocrData,
+              categorized_result: categorized,
+            }),
+          });
+          savedId = saveOut?.id || null;
+          state.currentFileRecordId = savedId;
+          await refreshFiles();
+        }
+
+        renderExpenses();
+        switchTab("gastos");
+        setAnalyzeBusy(false, "");
+        showToast(savedId ? "Análisis completo y guardado en Archivos" : "Análisis completo");
+      } catch (err) {
+        setAnalyzeBusy(false, "");
+        showToast(`Error en análisis: ${err.message}`, true, 4200);
+      }
+    }
+
+    function flattenedTransactions() {
+      if (!state.currentResult) return [];
+      const categorizedPages = state.currentResult?.categorized_result?.structured_data;
+      const fallbackPages = state.currentResult?.ocr_result?.structured_data || [];
+      const pages = Array.isArray(categorizedPages) && categorizedPages.length ? categorizedPages : fallbackPages;
+
+      const txs = [];
+      for (const page of pages) {
+        const currency = normalizeCurrency(page?.account_info?.currency);
+        for (const tx of page?.transactions || []) {
+          const description = (tx.referencia || tx.concepto || tx.original_text || "").trim();
+          const analysisText = (tx.original_text || tx.analysis_text || [tx.concepto, tx.referencia].filter(Boolean).join(" ")).trim();
+          txs.push({
+            id: txs.length,
+            pageNumber: page?.page_number || null,
+            date: tx.fecha || "",
+            description,
+            category: tx.category || "Otros",
+            source: tx.source || "fallback",
+            debit: parseAmount(tx.debitos),
+            credit: parseAmount(tx.creditos),
+            debitRaw: tx.debitos || "",
+            creditRaw: tx.creditos || "",
+            currency,
+            analysisText,
+            refText: [tx.concepto, tx.referencia].filter(Boolean).join(" ").trim(),
+          });
+        }
+      }
+      return txs;
+    }
+
+    function getCurrenciesFromTxs(txs) {
+      const order = ["UYU", "USD"];
+      const counts = { USD: 0, UYU: 0 };
+      for (const tx of txs) counts[tx.currency] = (counts[tx.currency] || 0) + 1;
+      return order.filter((c) => counts[c] > 0).map((c) => ({ code: c, count: counts[c] }));
+    }
+
+    function aggregateByCategory(txs, kind) {
+      const out = new Map();
+      for (const tx of txs) {
+        const amount = kind === "debit" ? tx.debit : tx.credit;
+        if (amount <= 0) continue;
+        const cat = tx.category || "Otros";
+        out.set(cat, (out.get(cat) || 0) + amount);
+      }
+      return [...out.entries()].map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+    }
+
+    function buildCategoryFilterOptions(txsCurrency) {
+      const current = state.categoryFilter;
+      const cats = [...new Set(txsCurrency.map((tx) => tx.category || "Otros"))].sort((a, b) => a.localeCompare(b));
+      categoryFilterSelect.innerHTML = '<option value="all">Todas las categorías</option>' + cats.map((cat) => `<option value="${esc(cat)}">${esc(cat)}</option>`).join("");
+      if (cats.includes(current)) {
+        categoryFilterSelect.value = current;
+      } else {
+        state.categoryFilter = "all";
+        categoryFilterSelect.value = "all";
+      }
+    }
+
+    function updateSummaryList(entries, currency) {
+      if (!entries.length) {
+        categorySummary.innerHTML = '<div style="color:#64748b;font-weight:600;">No hay datos para este filtro.</div>';
+        return;
+      }
+      categorySummary.innerHTML = entries
+        .slice(0, 12)
+        .map((entry) => {
+          const color = CATEGORY_PALETTE[entry.name] || CATEGORY_PALETTE.Otros;
+          return `
+            <div class="summary-item">
+              <div class="summary-left">
+                <span class="summary-dot" style="background:${color}"></span>
+                <span class="summary-name">${esc(entry.name)}</span>
+              </div>
+              <span class="summary-value">${esc(fmtMoney(entry.value, currency))}</span>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    function buildChart(entries, currency, txsCurrency) {
+      const canvas = $("#gastosChart");
+      if (!canvas) return;
+
+      if (state.chart) {
+        state.chart.destroy();
+        state.chart = null;
+      }
+
+      const labels = [];
+      const values = [];
+      const colors = [];
+      let chartType = "doughnut";
+      const datasets = [];
+
+      if (state.chartMode === "category") {
+        for (const entry of entries) {
+          labels.push(entry.name);
+          values.push(entry.value);
+          colors.push(CATEGORY_PALETTE[entry.name] || CATEGORY_PALETTE.Otros);
+        }
+        datasets.push({ data: values, backgroundColor: colors, borderWidth: 0, hoverOffset: 6 });
+      } else if (state.chartMode === "debit_credit") {
+        chartType = "bar";
+        const totalDebits = txsCurrency.reduce((acc, tx) => acc + (tx.debit > 0 ? tx.debit : 0), 0);
+        const totalCredits = txsCurrency.reduce((acc, tx) => acc + (tx.credit > 0 ? tx.credit : 0), 0);
+        labels.push("Débitos", "Créditos");
+        values.push(totalDebits, totalCredits);
+        datasets.push({
+          data: values,
+          backgroundColor: ["#3b82f6", "#16a34a"],
+          borderColor: ["#1d4ed8", "#15803d"],
+          borderWidth: 1.2,
+          borderRadius: 10,
+          maxBarThickness: 60,
+        });
+      } else {
+        chartType = "line";
+        let running = 0;
+        for (const tx of txsCurrency) {
+          running += (tx.credit || 0) - (tx.debit || 0);
+          labels.push(tx.date || `#${labels.length + 1}`);
+          values.push(running);
+        }
+        datasets.push({
+          data: values,
+          borderColor: "#2563eb",
+          backgroundColor: "rgba(37,99,235,.15)",
+          borderWidth: 2,
+          fill: true,
+          tension: 0.22,
+          pointRadius: values.length > 100 ? 0 : 2.5,
+          pointHoverRadius: 3,
+        });
+      }
+
+      state.chart = new Chart(canvas, {
+        type: chartType,
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: state.chartMode === "category", position: "bottom", labels: { usePointStyle: true, boxHeight: 8 } },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const val = Number(ctx.parsed?.y ?? ctx.parsed ?? 0);
+                  return ` ${ctx.label}: ${fmtMoney(val, currency)}`;
+                },
+              },
+            },
+          },
+          scales: state.chartMode === "category"
+            ? {}
+            : {
+                y: {
+                  ticks: {
+                    callback: (v) => {
+                      const num = Number(v);
+                      return Number.isFinite(num) ? num.toLocaleString("es-UY") : v;
+                    },
+                  },
+                  grid: { color: "rgba(148,163,184,.2)" },
+                },
+                x: { grid: { display: false } },
+              },
+          cutout: state.chartMode === "category" ? "58%" : undefined,
+        },
+      });
+    }
+
+    function filteredTableRows(txsCurrency) {
+      const q = state.search.trim().toLowerCase();
+      return txsCurrency.filter((tx) => {
+        if (state.movementFilter === "debit" && tx.debit <= 0) return false;
+        if (state.movementFilter === "credit" && tx.credit <= 0) return false;
+        if (state.categoryFilter !== "all" && (tx.category || "Otros") !== state.categoryFilter) return false;
+        if (!q) return true;
+        const hay = `${tx.date} ${tx.description} ${tx.category} ${tx.source}`.toLowerCase();
+        return hay.includes(q);
+      });
+    }
+
+    function renderTransactionsTable(rows, currency) {
+      if (!rows.length) {
+        transactionsBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#64748b;font-weight:600;padding:28px;">No hay movimientos para ese filtro.</td></tr>';
+        return;
+      }
+
+      transactionsBody.innerHTML = rows
+        .map((tx) => {
+          const cat = tx.category || "Otros";
+          const dotColor = CATEGORY_PALETTE[cat] || CATEGORY_PALETTE.Otros;
+          const amount = tx.debit > 0 ? tx.debit : tx.credit;
+          const amountClass = tx.debit > 0 ? "amount-debit" : "amount-credit";
+          return `
+            <tr>
+              <td>${esc(tx.date || "—")}</td>
+              <td class="row-description" title="${esc(tx.description || "—")}">${esc(tx.description || "—")}</td>
+              <td>
+                <span class="cat-pill">
+                  <span class="cat-pill-dot" style="background:${dotColor}"></span>
+                  ${esc(cat)}
+                </span>
+                <button class="cat-edit-btn" data-edit-cat="${tx.id}" title="Editar categoría">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </td>
+              <td class="right ${amountClass}">${esc(fmtMoney(amount, currency))}</td>
+            </tr>
+          `;
+        })
+        .join("");
+    }
+
+    function renderExpenses() {
+      if (!state.currentResult) {
+        gastosContent.hidden = true;
+        gastosEmpty.hidden = false;
+        if (state.chart) {
+          state.chart.destroy();
+          state.chart = null;
+        }
+        return;
+      }
+
+      const txs = flattenedTransactions();
+      if (!txs.length) {
+        gastosContent.hidden = true;
+        gastosEmpty.hidden = false;
+        gastosEmpty.textContent = "El análisis no tiene movimientos detectados.";
+        return;
+      }
+
+      gastosEmpty.hidden = true;
+      gastosContent.hidden = false;
+
+      const currencies = getCurrenciesFromTxs(txs);
+      if (!currencies.length) {
+        state.selectedCurrency = "UYU";
+      } else if (!currencies.find((c) => c.code === state.selectedCurrency)) {
+        state.selectedCurrency = currencies[0].code;
+      }
+
+      currencySwitch.innerHTML = currencies
+        .map((cur) => `
+          <button class="currency-pill ${cur.code === state.selectedCurrency ? "active" : ""}" data-currency="${cur.code}">
+            ${cur.code === "USD" ? `Dólares (USD) (${cur.count})` : `Pesos Uruguayos (UYU) (${cur.count})`}
+          </button>
+        `)
+        .join("");
+
+      const txsCurrency = txs.filter((tx) => tx.currency === state.selectedCurrency);
+      const totalDebits = txsCurrency.reduce((acc, tx) => acc + (tx.debit > 0 ? tx.debit : 0), 0);
+      const totalCredits = txsCurrency.reduce((acc, tx) => acc + (tx.credit > 0 ? tx.credit : 0), 0);
+      const net = totalCredits - totalDebits;
+
+      const title = state.currentResult.title || "Resumen";
+      const currencyLabel = state.selectedCurrency === "USD" ? "Dólares (USD)" : "Pesos Uruguayos (UYU)";
+      gastosTitle.textContent = `${title} (${currencyLabel})`;
+      gastosSub.textContent = "Débitos y créditos del período";
+
+      kpiGastos.textContent = fmtMoney(totalDebits, state.selectedCurrency);
+      kpiIngresos.textContent = fmtMoney(totalCredits, state.selectedCurrency);
+      kpiBalance.textContent = fmtMoney(net, state.selectedCurrency);
+
+      buildCategoryFilterOptions(txsCurrency);
+      const tableRows = filteredTableRows(txsCurrency);
+      renderTransactionsTable(tableRows, state.selectedCurrency);
+
+      const entries = aggregateByCategory(txsCurrency, state.chartKind);
+      const chartModeButtons = $$("#chartModeRow .chip");
+      chartModeButtons.forEach((btn) => btn.classList.toggle("soft-active", btn.dataset.mode === state.chartMode));
+
+      const moveButtons = $$("#movementFilterRow .chip");
+      moveButtons.forEach((btn) => btn.classList.toggle("active", btn.dataset.move === state.movementFilter));
+
+      const kindButtons = $$("#chartKindRow .kind-btn");
+      kindButtons.forEach((btn) => btn.classList.toggle("active", btn.dataset.kind === state.chartKind));
+
+      if (state.chartMode === "category") {
+        chartTitle.textContent = "Distribución";
+        chartKindRow.style.display = "flex";
+        updateSummaryList(entries, state.selectedCurrency);
+        buildChart(entries, state.selectedCurrency, txsCurrency);
+      } else if (state.chartMode === "debit_credit") {
+        chartTitle.textContent = "Débitos vs Créditos";
+        chartKindRow.style.display = "none";
+        updateSummaryList([
+          { name: "Débitos", value: totalDebits },
+          { name: "Créditos", value: totalCredits },
+        ], state.selectedCurrency);
+        buildChart([], state.selectedCurrency, txsCurrency);
+      } else {
+        chartTitle.textContent = "Neto Acumulado";
+        chartKindRow.style.display = "none";
+        const last = txsCurrency.reduce((acc, tx) => acc + (tx.credit || 0) - (tx.debit || 0), 0);
+        updateSummaryList([{ name: "Balance acumulado", value: last }], state.selectedCurrency);
+        buildChart([], state.selectedCurrency, txsCurrency);
+      }
+    }
+
+    function renderFiles() {
+      if (!state.user) {
+        filesList.innerHTML = "";
+        filesEmpty.hidden = false;
+        filesEmpty.textContent = "Inicia sesión para ver y administrar tus análisis guardados.";
+        return;
+      }
+
+      if (!state.files.length) {
+        filesList.innerHTML = "";
+        filesEmpty.hidden = false;
+        filesEmpty.textContent = "Todavía no hay análisis guardados para esta cuenta.";
+        return;
+      }
+
+      filesEmpty.hidden = true;
+      filesList.innerHTML = state.files
+        .map((file) => {
+          const palette = getPalette(file.color || DEFAULT_COLOR);
+          const movementText = Number(file.movement_count || 0) === 1 ? "1 movimiento" : `${Number(file.movement_count || 0)} movimientos`;
+          return `
+            <article class="file-card" draggable="true" data-file-id="${file.id}">
+              <div class="drag-handle" title="Arrastrar para reordenar">⋮⋮</div>
+              <div class="file-icon" style="--tile-bg:${palette.bg};--tile-fg:${palette.fg};">${iconSvg(file.icon || DEFAULT_ICON)}</div>
+              <div class="file-main" data-open-file="${file.id}">
+                <h3>${esc(file.title || "Resumen")}</h3>
+                <div class="file-meta">${esc(file.statement_date || "Sin fecha")} · ${esc(movementText)}</div>
+                <div class="file-meta">Creado el ${esc(formatDateTime(file.created_at))}</div>
+              </div>
+              <div class="file-actions">
+                <button class="ghost-btn" data-open-file="${file.id}">Abrir</button>
+                <button class="ghost-btn" data-edit-file="${file.id}">Editar</button>
+                <button class="ghost-btn danger-btn" data-delete-file="${file.id}">Eliminar</button>
+              </div>
+            </article>
+          `;
+        })
+        .join("");
+    }
+
+    async function refreshFiles() {
+      if (!state.user) {
+        state.files = [];
+        renderFiles();
+        return;
+      }
+      const out = await apiJson("/api/files");
+      state.files = Array.isArray(out?.items) ? out.items : [];
+      renderFiles();
+    }
+
+    async function loadFileIntoExpenses(fileId) {
+      const out = await apiJson(`/api/files/${fileId}`);
+      const item = out?.item || {};
+      const payload = out?.payload || {};
+      state.currentResult = {
+        ocr_result: payload.ocr_result || null,
+        categorized_result: payload.categorized_result || null,
+        title: item.title || guessTitleFromResult(payload.ocr_result || {}),
+        statement_date: item.statement_date || guessStatementDateToken(payload.ocr_result || {}),
+        source: item.source || "ocr_free_v1",
+      };
+      state.currentFileRecordId = item.id || null;
+      state.selectedCurrency = "UYU";
+      state.search = "";
+      state.categoryFilter = "all";
+      state.movementFilter = "all";
+      state.chartMode = "category";
+      state.chartKind = "debit";
+      searchInput.value = "";
+      renderExpenses();
+      switchTab("gastos");
+      showToast(`Cargado: ${item.title || "Resumen"}`);
+    }
+
+    function openFileEditModal(file) {
+      if (!file) return;
+      state.editingFile = file;
+      state.editingColor = file.color || DEFAULT_COLOR;
+      editFileName.value = file.title || "";
+      editFileIcon.innerHTML = FILE_ICONS
+        .map((icon) => `<option value="${icon.id}">${esc(icon.label)}</option>`)
+        .join("");
+      editFileIcon.value = FILE_ICONS.some((i) => i.id === file.icon) ? file.icon : DEFAULT_ICON;
+
+      editColorRow.innerHTML = Object.entries(FILE_COLORS)
+        .map(([name, pal]) => `
+          <button type="button" class="color-btn ${name === state.editingColor ? "active" : ""}" data-color="${name}" style="--tile-bg:${pal.bg};--tile-fg:${pal.fg};">
+            <span class="dot" style="background:${pal.dot}"></span>
+          </button>
+        `)
+        .join("");
+
+      updateFileEditPreview();
+      fileEditModal.showModal();
+    }
+
+    function updateFileEditPreview() {
+      const file = state.editingFile || {};
+      const title = editFileName.value.trim() || file.title || "Resumen";
+      const iconId = editFileIcon.value || file.icon || DEFAULT_ICON;
+      const color = state.editingColor || file.color || DEFAULT_COLOR;
+      const palette = getPalette(color);
+
+      editPreviewIcon.style.setProperty("--tile-bg", palette.bg);
+      editPreviewIcon.style.setProperty("--tile-fg", palette.fg);
+      editPreviewIcon.innerHTML = iconSvg(iconId);
+      editPreviewTitle.textContent = title;
+      editPreviewMeta.textContent = `${file.statement_date || "Sin fecha"} · ${formatDateTime(file.created_at)}`;
+    }
+
+    async function saveFileEdit() {
+      if (!state.editingFile) return;
+      const title = editFileName.value.trim();
+      if (!title) {
+        showToast("El nombre no puede estar vacío", true);
+        return;
+      }
+
+      const payload = {
+        title,
+        icon: editFileIcon.value || DEFAULT_ICON,
+        color: state.editingColor || DEFAULT_COLOR,
+      };
+
+      await apiJson(`/api/files/${state.editingFile.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      fileEditModal.close();
+      state.editingFile = null;
+      await refreshFiles();
+      showToast("Análisis actualizado");
+    }
+
+    function openCategoryEdit(txId) {
+      const tx = filteredTableRows(flattenedTransactions().filter((t) => t.currency === state.selectedCurrency))
+        .find((r) => r.id === txId);
+      if (!tx) return;
+
+      state.editingCategoryTx = tx;
+      categoryModalText.textContent = tx.description
+        ? `Selecciona una categoría para: ${tx.description}`
+        : "Selecciona una categoría.";
+      categorySelect.innerHTML = ALL_CATEGORIES.map((cat) => `<option value="${esc(cat)}">${esc(cat)}</option>`).join("");
+      categorySelect.value = ALL_CATEGORIES.includes(tx.category) ? tx.category : "Otros";
+      categoryModal.showModal();
+    }
+
+    function applyManualCategoryLocally(analysisText, newCategory) {
+      const categorizedPages = state.currentResult?.categorized_result?.structured_data;
+      const fallbackPages = state.currentResult?.ocr_result?.structured_data;
+      const pages = Array.isArray(categorizedPages) && categorizedPages.length
+        ? categorizedPages
+        : (Array.isArray(fallbackPages) ? fallbackPages : []);
+
+      if (!pages.length) return;
+      if (!state.currentResult.categorized_result) {
+        state.currentResult.categorized_result = {
+          structured_data: pages,
+          categorization_stats: {},
+        };
+      }
+
+      for (const page of pages) {
+        for (const tx of page.transactions || []) {
+          const key = (tx.original_text || tx.analysis_text || [tx.concepto, tx.referencia].filter(Boolean).join(" ")).trim();
+          if (key && key === analysisText) {
+            tx.category = newCategory;
+            tx.source = "manual";
+          }
+        }
+      }
+    }
+
+    async function saveCategoryEdit() {
+      const tx = state.editingCategoryTx;
+      if (!tx) return;
+      const category = categorySelect.value || "Otros";
+      if (!tx.analysisText) {
+        showToast("No se pudo identificar el texto base para guardar la categoría.", true, 3500);
+        return;
+      }
+      await apiJson("/api/recategorize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: tx.analysisText, category }),
+      });
+      applyManualCategoryLocally(tx.analysisText, category);
+      categoryModal.close();
+      state.editingCategoryTx = null;
+      renderExpenses();
+      showToast("Categoría actualizada");
+    }
+
+    function reorderLocalFilesByDom() {
+      const ids = [...filesList.querySelectorAll(".file-card[data-file-id]")]
+        .map((el) => Number(el.dataset.fileId));
+      if (!ids.length) return null;
+      return ids;
+    }
+
+    async function persistFilesOrder(ids) {
+      await apiJson("/api/files/reorder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ file_ids: ids }),
+      });
+      const byId = new Map(state.files.map((file) => [Number(file.id), file]));
+      state.files = ids.map((id) => byId.get(id)).filter(Boolean);
+      renderFiles();
+      showToast("Orden actualizado");
+    }
+
+    async function bootstrapSession() {
+      if (!getToken()) {
+        state.user = null;
+        updateAuthHeader();
+        renderFiles();
+        return;
+      }
+      try {
+        const out = await apiJson("/api/auth/me");
+        state.user = out?.user || null;
+        updateAuthHeader();
+        await refreshFiles();
+      } catch (_) {
+        setToken(null);
+        state.user = null;
+        updateAuthHeader();
+        renderFiles();
+      }
+    }
+
+    $$(".app-tab").forEach((btn) => {
+      btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+    });
+
+    dropArea.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", () => {
+      if (fileInput.files && fileInput.files.length) {
+        handleFileSelect(fileInput.files[0]);
+      }
+    });
+
+    ["dragenter", "dragover"].forEach((evt) => {
+      dropArea.addEventListener(evt, (ev) => {
+        ev.preventDefault();
+        dropArea.classList.add("dragover");
+      });
+    });
+
+    ["dragleave", "drop"].forEach((evt) => {
+      dropArea.addEventListener(evt, (ev) => {
+        ev.preventDefault();
+        dropArea.classList.remove("dragover");
+      });
+    });
+
+    dropArea.addEventListener("drop", (ev) => {
+      const files = ev.dataTransfer?.files;
+      if (files && files.length) {
+        handleFileSelect(files[0]);
+      }
+    });
+
+    btnAnalyze.addEventListener("click", () => analyzeCurrentFile());
+
+    btnOpenAuth.addEventListener("click", () => {
+      authEmail.value = "";
+      authPassword.value = "";
+      setAuthMessage("");
+      authModal.showModal();
+    });
+
+    btnCloseAuth.addEventListener("click", () => authModal.close());
+
+    btnLogin.addEventListener("click", async () => {
+      try {
+        setAuthMessage("Iniciando sesión...");
+        const out = await apiJson("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: authEmail.value || "",
+            password: authPassword.value || "",
+          }),
+        });
+        setToken(out?.token || null);
+        state.user = out?.user || null;
+        updateAuthHeader();
+        await refreshFiles();
+        authModal.close();
+        showToast("Sesión iniciada");
+      } catch (err) {
+        setAuthMessage(`Error: ${err.message}`, true);
+      }
+    });
+
+    btnRegister.addEventListener("click", async () => {
+      try {
+        setAuthMessage("Creando cuenta...");
+        const out = await apiJson("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: authEmail.value || "",
+            password: authPassword.value || "",
+          }),
+        });
+        setToken(out?.token || null);
+        state.user = out?.user || null;
+        updateAuthHeader();
+        await refreshFiles();
+        authModal.close();
+        showToast("Cuenta creada");
+      } catch (err) {
+        setAuthMessage(`Error: ${err.message}`, true);
+      }
+    });
+
+    btnLogout.addEventListener("click", async () => {
+      try {
+        await apiJson("/api/auth/logout", { method: "POST" });
+      } catch (_) {
+        // ignore
+      }
+      setToken(null);
+      state.user = null;
+      state.files = [];
+      updateAuthHeader();
+      renderFiles();
+      showToast("Sesión cerrada");
+    });
+
+    btnGoAnalyze.addEventListener("click", () => switchTab("analizar"));
+
+    $("#movementFilterRow").addEventListener("click", (ev) => {
+      const btn = ev.target.closest("[data-move]");
+      if (!btn) return;
+      state.movementFilter = btn.dataset.move || "all";
+      renderExpenses();
+    });
+
+    $("#chartModeRow").addEventListener("click", (ev) => {
+      const btn = ev.target.closest("[data-mode]");
+      if (!btn) return;
+      state.chartMode = btn.dataset.mode || "category";
+      renderExpenses();
+    });
+
+    chartKindRow.addEventListener("click", (ev) => {
+      const btn = ev.target.closest("[data-kind]");
+      if (!btn) return;
+      state.chartKind = btn.dataset.kind || "debit";
+      renderExpenses();
+    });
+
+    currencySwitch.addEventListener("click", (ev) => {
+      const btn = ev.target.closest("[data-currency]");
+      if (!btn) return;
+      state.selectedCurrency = btn.dataset.currency || "UYU";
+      renderExpenses();
+    });
+
+    searchInput.addEventListener("input", () => {
+      state.search = searchInput.value || "";
+      renderExpenses();
+    });
+
+    categoryFilterSelect.addEventListener("change", () => {
+      state.categoryFilter = categoryFilterSelect.value || "all";
+      renderExpenses();
+    });
+
+    transactionsBody.addEventListener("click", (ev) => {
+      const btn = ev.target.closest("[data-edit-cat]");
+      if (!btn) return;
+      const txId = Number(btn.dataset.editCat);
+      if (Number.isFinite(txId)) openCategoryEdit(txId);
+    });
+
+    btnCloseCategoryModal.addEventListener("click", () => categoryModal.close());
+    btnCancelCategoryEdit.addEventListener("click", () => categoryModal.close());
+    btnSaveCategoryEdit.addEventListener("click", async () => {
+      try {
+        await saveCategoryEdit();
+      } catch (err) {
+        showToast(`No se pudo guardar categoría: ${err.message}`, true, 3500);
+      }
+    });
+
+    filesList.addEventListener("click", async (ev) => {
+      const openBtn = ev.target.closest("[data-open-file]");
+      const editBtn = ev.target.closest("[data-edit-file]");
+      const deleteBtn = ev.target.closest("[data-delete-file]");
+      try {
+        if (openBtn) {
+          const id = Number(openBtn.dataset.openFile);
+          if (Number.isFinite(id)) await loadFileIntoExpenses(id);
+          return;
+        }
+        if (editBtn) {
+          const id = Number(editBtn.dataset.editFile);
+          const file = state.files.find((f) => Number(f.id) === id);
+          openFileEditModal(file);
+          return;
+        }
+        if (deleteBtn) {
+          const id = Number(deleteBtn.dataset.deleteFile);
+          if (!Number.isFinite(id)) return;
+          if (!window.confirm("¿Eliminar este análisis?")) return;
+          await apiJson(`/api/files/${id}`, { method: "DELETE" });
+          state.files = state.files.filter((f) => Number(f.id) !== id);
+          renderFiles();
+          showToast("Análisis eliminado");
+        }
+      } catch (err) {
+        showToast(`Error: ${err.message}`, true, 3500);
+      }
+    });
+
+    filesList.addEventListener("dragstart", (ev) => {
+      const card = ev.target.closest(".file-card[data-file-id]");
+      if (!card) return;
+      state.draggingFileId = Number(card.dataset.fileId);
+      card.classList.add("dragging");
+      ev.dataTransfer.effectAllowed = "move";
+      ev.dataTransfer.setData("text/plain", String(state.draggingFileId));
+    });
+
+    filesList.addEventListener("dragover", (ev) => {
+      ev.preventDefault();
+      const overCard = ev.target.closest(".file-card[data-file-id]");
+      if (!overCard) return;
+      const dragging = filesList.querySelector(".file-card.dragging");
+      if (!dragging || overCard === dragging) return;
+
+      $$(".file-card").forEach((card) => {
+        card.classList.remove("drag-top", "drag-bottom");
+      });
+
+      const rect = overCard.getBoundingClientRect();
+      const isBefore = ev.clientY < rect.top + rect.height / 2;
+      overCard.classList.add(isBefore ? "drag-top" : "drag-bottom");
+
+      if (isBefore) {
+        filesList.insertBefore(dragging, overCard);
+      } else {
+        filesList.insertBefore(dragging, overCard.nextSibling);
+      }
+    });
+
+    filesList.addEventListener("drop", (ev) => {
+      ev.preventDefault();
+      state.pendingOrderIds = reorderLocalFilesByDom();
+      $$(".file-card").forEach((card) => card.classList.remove("drag-top", "drag-bottom"));
+    });
+
+    filesList.addEventListener("dragend", async () => {
+      const dragging = filesList.querySelector(".file-card.dragging");
+      if (dragging) dragging.classList.remove("dragging");
+      $$(".file-card").forEach((card) => card.classList.remove("drag-top", "drag-bottom"));
+
+      if (!state.pendingOrderIds || !state.pendingOrderIds.length) return;
+      const ids = state.pendingOrderIds;
+      state.pendingOrderIds = null;
+      try {
+        await persistFilesOrder(ids);
+      } catch (err) {
+        showToast(`No se pudo guardar el orden: ${err.message}`, true, 3800);
+        await refreshFiles();
+      }
+    });
+
+    btnCloseFileEdit.addEventListener("click", () => fileEditModal.close());
+    btnCancelFileEdit.addEventListener("click", () => fileEditModal.close());
+
+    editFileName.addEventListener("input", updateFileEditPreview);
+    editFileIcon.addEventListener("change", updateFileEditPreview);
+
+    editColorRow.addEventListener("click", (ev) => {
+      const btn = ev.target.closest("[data-color]");
+      if (!btn) return;
+      state.editingColor = btn.dataset.color || DEFAULT_COLOR;
+      $$("#editColorRow .color-btn").forEach((item) => item.classList.toggle("active", item.dataset.color === state.editingColor));
+      updateFileEditPreview();
+    });
+
+    btnSaveFileEdit.addEventListener("click", async () => {
+      try {
+        await saveFileEdit();
+      } catch (err) {
+        showToast(`No se pudo guardar: ${err.message}`, true, 3600);
+      }
+    });
+
+    bootstrapSession().catch(() => null);
+    setPickedFile(null);
+    renderExpenses();
+    renderFiles();
+  </script>
+</body>
+</html>
