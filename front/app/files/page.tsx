@@ -21,6 +21,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useExpenseStore } from '@/store/expenses';
 import { useAuthStore } from '@/store/auth';
+import { clearStoredExpenseSnapshot, saveStoredExpenseSnapshot } from '@/lib/expense-cache';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -361,13 +362,17 @@ export default function AnalysisHistoryPage() {
             movementsByCurrency: response.data.movementsByCurrency || [],
           });
 
-          localStorage.setItem('lastViewedTransactions', JSON.stringify(response.data.transactions || []));
-          localStorage.setItem('lastViewedCategoryData', JSON.stringify(response.data.categoryData || []));
-          localStorage.setItem('lastViewedDailyData', JSON.stringify(response.data.dailyData || []));
-          localStorage.setItem('lastViewedMovementsByCurrency', JSON.stringify(response.data.movementsByCurrency || []));
-          localStorage.setItem('lastViewedAnalysisId', analysis.id);
           if (currentUserId) {
-            localStorage.setItem('lastViewedUserId', currentUserId);
+            saveStoredExpenseSnapshot({
+              transactions: response.data.transactions || [],
+              categoryData: response.data.categoryData || [],
+              dailyData: response.data.dailyData || [],
+              movementsByCurrency: response.data.movementsByCurrency || [],
+              userId: currentUserId,
+              analysisId: analysis.id,
+            });
+          } else {
+            clearStoredExpenseSnapshot();
           }
           
           // Redirigir a la página de gastos
@@ -376,10 +381,7 @@ export default function AnalysisHistoryPage() {
           console.error('Error al procesar los datos del análisis:', parseError);
           
           // Limpiar datos del localStorage para evitar mostrar datos antiguos
-          localStorage.removeItem('lastViewedTransactions');
-          localStorage.removeItem('lastViewedCategoryData');
-          localStorage.removeItem('lastViewedDailyData');
-          localStorage.removeItem('lastViewedMovementsByCurrency');
+          clearStoredExpenseSnapshot();
           
           // Limpiar los datos del store
           setExpenseData({
@@ -400,10 +402,7 @@ export default function AnalysisHistoryPage() {
       setError(err instanceof Error ? err.message : 'Error al cargar el análisis');
       
       // Limpiar datos del localStorage para evitar mostrar datos antiguos
-      localStorage.removeItem('lastViewedTransactions');
-      localStorage.removeItem('lastViewedCategoryData');
-      localStorage.removeItem('lastViewedDailyData');
-      localStorage.removeItem('lastViewedMovementsByCurrency');
+      clearStoredExpenseSnapshot();
       
       // Limpiar los datos del store
       setExpenseData({

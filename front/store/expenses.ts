@@ -77,6 +77,7 @@ interface ExpenseState {
   setError: (error: string | null) => void
   setLoading: (isLoading: boolean) => void
   clearData: () => void
+  resetState: () => void
 }
 
 // Referencia para control de actualizaciones de isLoading
@@ -365,6 +366,22 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
       dailyData: [],
       movementsByCurrency: [],
       error: null 
+    });
+  },
+  resetState: () => {
+    if (loadingTimeoutId) {
+      clearTimeout(loadingTimeoutId);
+      loadingTimeoutId = null;
+    }
+
+    set({
+      transactions: [],
+      categoryData: [],
+      dailyData: [],
+      movementsByCurrency: [],
+      error: null,
+      isLoading: false,
+      isUpdating: false,
     });
   },
 }))

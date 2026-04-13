@@ -11,6 +11,7 @@ import { useAuthStore } from "@/store/auth"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { financialService } from '@/lib/api'
+import { clearStoredExpenseSnapshot, saveStoredExpenseSnapshot } from '@/lib/expense-cache'
 import {
   buildAnalysisFromOcrFreePayload,
   guessStatementDateToken,
@@ -175,12 +176,8 @@ export function UploadForm() {
     } else if (analysisState === AnalysisState.ERROR) {
       // Si hay un error, limpiar datos del localStorage pero NO redirigir
       const timer = setTimeout(() => {
-        // Limpiar datos del localStorage para evitar mostrar datos antiguos
-        localStorage.removeItem('lastViewedTransactions');
-        localStorage.removeItem('lastViewedCategoryData');
-        localStorage.removeItem('lastViewedDailyData');
-        localStorage.removeItem('lastViewedMovementsByCurrency');
-        
+        clearStoredExpenseSnapshot()
+
         // Ya no redirigimos a /expenses cuando hay un error
         // El usuario puede intentar de nuevo o navegar manualmente
       }, 1000)
@@ -287,12 +284,14 @@ export function UploadForm() {
 
       // Persistir en localStorage para que /expenses renderice de inmediato.
       if (currentUser) {
-        localStorage.setItem('lastViewedTransactions', JSON.stringify(allTransactions))
-        localStorage.setItem('lastViewedCategoryData', JSON.stringify(allCategoryData))
-        localStorage.setItem('lastViewedDailyData', JSON.stringify(allDailyData))
-        localStorage.setItem('lastViewedMovementsByCurrency', JSON.stringify(allMovementsByCurrency))
-        localStorage.setItem('lastViewedUserId', currentUser.id)
-        localStorage.setItem('lastViewedAnalysisId', String(saveResponse.data.id))
+        saveStoredExpenseSnapshot({
+          transactions: allTransactions,
+          categoryData: allCategoryData,
+          dailyData: allDailyData,
+          movementsByCurrency: allMovementsByCurrency,
+          userId: currentUser.id,
+          analysisId: String(saveResponse.data.id),
+        })
       }
 
       // Marcar como completado y asegurar que el progreso esté al 100%
