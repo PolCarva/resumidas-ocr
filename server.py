@@ -34,6 +34,18 @@ try:
 except ImportError:
     TESSERACT_AVAILABLE = False
 
+try:
+    import psycopg
+    from psycopg.rows import dict_row
+    from psycopg import errors as psycopg_errors
+
+    PSYCOPG_AVAILABLE = True
+except Exception:
+    psycopg = None  # type: ignore[assignment]
+    dict_row = None  # type: ignore[assignment]
+    psycopg_errors = None  # type: ignore[assignment]
+    PSYCOPG_AVAILABLE = False
+
 app = FastAPI(title="OCR Free")
 
 app.add_middleware(
@@ -65,54 +77,166 @@ _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 DEFAULT_FILE_ICON = "bar-chart-3"
 DEFAULT_FILE_COLOR = "blue"
 
+APP_ENV = (os.getenv("APP_ENV") or os.getenv("ENV") or "local").strip().lower()
+
+
+def _should_use_postgres() -> bool:
+    """
+    Local: SQLite.
+    PD/production: Postgres (Railway) via DATABASE_URL.
+    """
+    return APP_ENV in ("pd", "prod", "production", "staging")
+
+
+def _postgres_dsn() -> str:
+    dsn = (os.getenv("DATABASE_URL") or "").strip()
+    if not dsn:
+        raise RuntimeError("Falta DATABASE_URL para Postgres en PD/production")
+    return dsn
+
+
+def _sql_placeholders(sql: str, use_postgres: bool) -> str:
+    if not use_postgres:
+        return sql
+    return sql.replace("?", "%s")
+
+
+class _DbResult:
+    def __init__(self, cursor: Any):
+        self._cursor = cursor
+
+    def fetchone(self):
+        return self._cursor.fetchone()
+
+    def fetchall(self):
+        return self._cursor.fetchall()
+
+
+class _DbConn:
+    def __init__(self, kind: str, conn: Any):
+        self.kind = kind  # "sqlite" | "postgres"
+        self._conn = conn
+
+    def execute(self, sql: str, params: tuple[Any, ...] = ()) -> _DbResult:
+        if self.kind == "postgres":
+            sql = _sql_placeholders(sql, True)
+            cur = self._conn.cursor()
+            cur.execute(sql, params)
+            return _DbResult(cur)
+        cur = self._conn.execute(sql, params)
+        return _DbResult(cur)
+
+    def execute_returning_id(self, sql: str, params: tuple[Any, ...] = ()) -> int:
+        """
+        SQLite: uses lastrowid.
+        Postgres: adds RETURNING id.
+        """
+        if self.kind != "postgres":
+            cur = self._conn.execute(sql, params)
+            return int(cur.lastrowid)
+
+        sql = _sql_placeholders(sql, True).rstrip().rstrip(";") + " RETURNING id"
+        cur = self._conn.cursor()
+        cur.execute(sql, params)
+        row = cur.fetchone()
+        if not row or "id" not in row:
+            raise RuntimeError("INSERT no devolvió id (RETURNING)")
+        return int(row["id"])
+
+    def commit(self) -> None:
+        self._conn.commit()
+
+    def close(self) -> None:
+        self._conn.close()
+
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _db_conn() -> sqlite3.Connection:
+def _db_conn() -> _DbConn:
+    if _should_use_postgres():
+        if not PSYCOPG_AVAILABLE:
+            raise RuntimeError("psycopg no está disponible (requerido para Postgres en PD)")
+        conn = psycopg.connect(_postgres_dsn(), row_factory=dict_row)
+        return _DbConn("postgres", conn)
+
     conn = sqlite3.connect(APP_DB_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
-    return conn
+    return _DbConn("sqlite", conn)
 
 
 def init_app_db() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     conn = _db_conn()
     try:
-        conn.execute(
-            """CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                email TEXT NOT NULL UNIQUE,
-                password_hash TEXT NOT NULL,
-                salt TEXT NOT NULL,
-                created_at TEXT NOT NULL
-            )"""
-        )
-        conn.execute(
-            """CREATE TABLE IF NOT EXISTS user_sessions (
-                token TEXT PRIMARY KEY,
-                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                created_at TEXT NOT NULL,
-                expires_at TEXT NOT NULL
-            )"""
-        )
-        conn.execute(
-            """CREATE TABLE IF NOT EXISTS saved_statements (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                title TEXT NOT NULL,
-                statement_date TEXT,
-                source TEXT,
-                movement_count INTEGER NOT NULL DEFAULT 0,
-                icon TEXT NOT NULL DEFAULT 'bar-chart-3',
-                color TEXT NOT NULL DEFAULT 'blue',
-                sort_order INTEGER NOT NULL DEFAULT 0,
-                payload_json TEXT NOT NULL,
-                created_at TEXT NOT NULL
-            )"""
-        )
+        if conn.kind == "postgres":
+            conn.execute(
+                """CREATE TABLE IF NOT EXISTS users (
+                    id BIGSERIAL PRIMARY KEY,
+                    email TEXT NOT NULL UNIQUE,
+                    password_hash TEXT NOT NULL,
+                    salt TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                )"""
+            )
+            conn.execute(
+                """CREATE TABLE IF NOT EXISTS user_sessions (
+                    token TEXT PRIMARY KEY,
+                    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    created_at TEXT NOT NULL,
+                    expires_at TEXT NOT NULL
+                )"""
+            )
+            conn.execute(
+                """CREATE TABLE IF NOT EXISTS saved_statements (
+                    id BIGSERIAL PRIMARY KEY,
+                    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    title TEXT NOT NULL,
+                    statement_date TEXT,
+                    source TEXT,
+                    movement_count INTEGER NOT NULL DEFAULT 0,
+                    icon TEXT NOT NULL DEFAULT 'bar-chart-3',
+                    color TEXT NOT NULL DEFAULT 'blue',
+                    sort_order INTEGER NOT NULL DEFAULT 0,
+                    payload_json TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                )"""
+            )
+        else:
+            conn.execute(
+                """CREATE TABLE IF NOT EXISTS users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    email TEXT NOT NULL UNIQUE,
+                    password_hash TEXT NOT NULL,
+                    salt TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                )"""
+            )
+            conn.execute(
+                """CREATE TABLE IF NOT EXISTS user_sessions (
+                    token TEXT PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    created_at TEXT NOT NULL,
+                    expires_at TEXT NOT NULL
+                )"""
+            )
+            conn.execute(
+                """CREATE TABLE IF NOT EXISTS saved_statements (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    title TEXT NOT NULL,
+                    statement_date TEXT,
+                    source TEXT,
+                    movement_count INTEGER NOT NULL DEFAULT 0,
+                    icon TEXT NOT NULL DEFAULT 'bar-chart-3',
+                    color TEXT NOT NULL DEFAULT 'blue',
+                    sort_order INTEGER NOT NULL DEFAULT 0,
+                    payload_json TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                )"""
+            )
         _ensure_saved_statements_schema(conn)
         conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id)"
@@ -128,19 +252,37 @@ def init_app_db() -> None:
         conn.close()
 
 
-def _table_columns(conn: sqlite3.Connection, table_name: str) -> set[str]:
+def _table_columns(conn: _DbConn, table_name: str) -> set[str]:
+    if conn.kind == "postgres":
+        rows = conn.execute(
+            """SELECT column_name
+               FROM information_schema.columns
+               WHERE table_schema = 'public' AND table_name = ?""",
+            (table_name,),
+        ).fetchall()
+        return {str(r["column_name"]) for r in rows}
+
     rows = conn.execute(f"PRAGMA table_info({table_name})").fetchall()
     return {str(r["name"]) for r in rows}
 
 
-def _ensure_saved_statements_schema(conn: sqlite3.Connection) -> None:
+def _ensure_saved_statements_schema(conn: _DbConn) -> None:
     columns = _table_columns(conn, "saved_statements")
     if "icon" not in columns:
-        conn.execute("ALTER TABLE saved_statements ADD COLUMN icon TEXT")
+        if conn.kind == "postgres":
+            conn.execute("ALTER TABLE saved_statements ADD COLUMN IF NOT EXISTS icon TEXT")
+        else:
+            conn.execute("ALTER TABLE saved_statements ADD COLUMN icon TEXT")
     if "color" not in columns:
-        conn.execute("ALTER TABLE saved_statements ADD COLUMN color TEXT")
+        if conn.kind == "postgres":
+            conn.execute("ALTER TABLE saved_statements ADD COLUMN IF NOT EXISTS color TEXT")
+        else:
+            conn.execute("ALTER TABLE saved_statements ADD COLUMN color TEXT")
     if "sort_order" not in columns:
-        conn.execute("ALTER TABLE saved_statements ADD COLUMN sort_order INTEGER")
+        if conn.kind == "postgres":
+            conn.execute("ALTER TABLE saved_statements ADD COLUMN IF NOT EXISTS sort_order INTEGER")
+        else:
+            conn.execute("ALTER TABLE saved_statements ADD COLUMN sort_order INTEGER")
 
     conn.execute(
         "UPDATE saved_statements SET icon = ? WHERE icon IS NULL OR TRIM(icon) = ''",
@@ -209,7 +351,7 @@ def _verify_password(password: str, salt: str, expected_hash: str) -> bool:
     return hmac.compare_digest(got, expected_hash)
 
 
-def _create_session_token(conn: sqlite3.Connection, user_id: int) -> str:
+def _create_session_token(conn: _DbConn, user_id: int) -> str:
     token = secrets.token_urlsafe(48)
     now = datetime.now(timezone.utc)
     expires = now + timedelta(days=SESSION_TTL_DAYS)
@@ -429,7 +571,7 @@ def _normalize_saved_payload(
 
 
 def _persist_saved_payload(
-    conn: sqlite3.Connection,
+    conn: _DbConn,
     file_id: int,
     payload: dict[str, Any],
 ) -> int:
@@ -755,12 +897,11 @@ async def register(req: AuthRequest):
         salt = secrets.token_hex(16)
         pw_hash = _hash_password(password, salt)
         now = _now_iso()
-        cur = conn.execute(
+        user_id = conn.execute_returning_id(
             """INSERT INTO users (email, password_hash, salt, created_at)
                VALUES (?, ?, ?, ?)""",
             (email, pw_hash, salt, now),
         )
-        user_id = int(cur.lastrowid)
         token = _create_session_token(conn, user_id)
         return JSONResponse(
             content={
@@ -768,11 +909,19 @@ async def register(req: AuthRequest):
                 "user": {"id": user_id, "email": email},
             }
         )
-    except sqlite3.IntegrityError:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="email_in_use",
-        )
+    except Exception as e:
+        if conn.kind == "postgres" and psycopg_errors is not None:
+            if isinstance(e, psycopg_errors.UniqueViolation):
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="email_in_use",
+                )
+        if isinstance(e, sqlite3.IntegrityError):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="email_in_use",
+            )
+        raise
     finally:
         conn.close()
 
@@ -917,7 +1066,7 @@ async def save_file(req: SaveFileRequest, request: Request):
         ).fetchone()
         next_sort_order = int(max_sort_row["max_sort"] or 0) + 1
 
-        cur = conn.execute(
+        file_id = conn.execute_returning_id(
             """INSERT INTO saved_statements
                (user_id, title, statement_date, source, movement_count, icon, color, sort_order, payload_json, created_at)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
@@ -934,7 +1083,6 @@ async def save_file(req: SaveFileRequest, request: Request):
                 now,
             ),
         )
-        file_id = int(cur.lastrowid)
         payload, _ = _normalize_saved_payload(payload, file_id)
         movement_count = _persist_saved_payload(conn, file_id, payload)
         conn.commit()
