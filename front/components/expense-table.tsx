@@ -65,22 +65,22 @@ function SimpleModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md animate-in fade-in zoom-in duration-200 rounded-[1.6rem] border border-white/75 bg-white/96 p-6 shadow-[0_36px_90px_-42px_rgba(15,23,42,0.55)]">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">{title}</h3>
+          <h3 className="text-xl font-semibold tracking-tight text-slate-950">{title}</h3>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
             disabled={isLoading}
-            className="h-6 w-6"
+            className="h-9 w-9 rounded-full text-slate-500"
           >
             <X className="h-4 w-4" />
           </Button>
         </div>
 
-        <p className="mb-6 text-gray-600">{description}</p>
+        <p className="mb-6 leading-7 text-slate-600">{description}</p>
 
         <div className="flex justify-end gap-3">
           <Button variant="outline" onClick={onClose} disabled={isLoading}>
@@ -503,9 +503,9 @@ export function ExpenseTable({ activeCurrency = null }: ExpenseTableProps) {
 
   if (uiFreeze || isStoreUpdating) {
     return (
-      <div className="flex min-h-[400px] flex-col items-center justify-center space-y-4">
-        <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
-        <p className="text-lg text-gray-600">Procesando...</p>
+      <div className="surface-card flex min-h-[400px] flex-col items-center justify-center space-y-4">
+        <Loader2 className="h-12 w-12 animate-spin text-sky-600" />
+        <p className="text-lg text-slate-600">Procesando...</p>
       </div>
     )
   }
@@ -542,7 +542,7 @@ export function ExpenseTable({ activeCurrency = null }: ExpenseTableProps) {
     onPrev: () => void
     onNext: () => void
   }) => (
-    <section className="space-y-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+    <section className="surface-card space-y-4 p-4 md:p-5">
       <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
@@ -553,12 +553,12 @@ export function ExpenseTable({ activeCurrency = null }: ExpenseTableProps) {
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-gray-200">
+      <div className="overflow-hidden rounded-[1.35rem] border border-slate-200/85 bg-white/80">
         <Table>
-          <TableHeader className="bg-gray-50">
+          <TableHeader className="bg-slate-50/80">
             <TableRow>
               <TableHead
-                className="cursor-pointer font-semibold text-gray-600 hover:bg-gray-100"
+                className="cursor-pointer hover:bg-slate-100/80"
                 onClick={() => handleSort('date')}
               >
                 <div className="flex items-center">
@@ -567,7 +567,7 @@ export function ExpenseTable({ activeCurrency = null }: ExpenseTableProps) {
                 </div>
               </TableHead>
               <TableHead
-                className="cursor-pointer font-semibold text-gray-600 hover:bg-gray-100"
+                className="cursor-pointer hover:bg-slate-100/80"
                 onClick={() => handleSort('description')}
               >
                 <div className="flex items-center">
@@ -576,7 +576,7 @@ export function ExpenseTable({ activeCurrency = null }: ExpenseTableProps) {
                 </div>
               </TableHead>
               <TableHead
-                className="cursor-pointer font-semibold text-gray-600 hover:bg-gray-100"
+                className="cursor-pointer hover:bg-slate-100/80"
                 onClick={() => handleSort('category')}
               >
                 <div className="flex items-center">
@@ -585,7 +585,7 @@ export function ExpenseTable({ activeCurrency = null }: ExpenseTableProps) {
                 </div>
               </TableHead>
               <TableHead
-                className="cursor-pointer text-right font-semibold text-gray-600 hover:bg-gray-100"
+                className="cursor-pointer text-right hover:bg-slate-100/80"
                 onClick={() => handleSort('amount')}
               >
                 <div className="flex items-center justify-end">
@@ -604,10 +604,10 @@ export function ExpenseTable({ activeCurrency = null }: ExpenseTableProps) {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.24, delay: index * 0.03 }}
-                  className="border-b border-gray-100 hover:bg-gray-50"
+                  className="border-b border-slate-100/90 hover:bg-slate-50/80"
                 >
-                  <TableCell className="font-medium text-gray-700">{movement.date}</TableCell>
-                  <TableCell className="text-gray-700">{movement.description}</TableCell>
+                  <TableCell className="font-medium text-slate-700">{movement.date}</TableCell>
+                  <TableCell className="text-slate-700">{movement.description}</TableCell>
                   <TableCell>
                     {movement.editable && editingTransaction === movement.transactionId ? (
                       <Select
@@ -619,7 +619,7 @@ export function ExpenseTable({ activeCurrency = null }: ExpenseTableProps) {
                         }}
                         disabled={isUpdating || isStoreUpdating}
                       >
-                        <SelectTrigger className="h-8 w-full border-gray-200 px-2 py-0 text-xs">
+                        <SelectTrigger className="h-9 w-full px-3 text-xs">
                           <SelectValue placeholder="Seleccionar categoría">
                             {movement.category}
                           </SelectValue>
@@ -644,7 +644,7 @@ export function ExpenseTable({ activeCurrency = null }: ExpenseTableProps) {
                       <div className="flex items-center gap-2">
                         <Badge
                           variant="outline"
-                          className="w-fit border-0 px-2 py-1"
+                          className="w-fit border-0 px-2.5 py-1.5"
                           style={{
                             backgroundColor: `${getCategoryColor(movement.category)}15`,
                             color: getCategoryColor(movement.category),
@@ -659,10 +659,10 @@ export function ExpenseTable({ activeCurrency = null }: ExpenseTableProps) {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6"
+                            className="h-8 w-8 rounded-full"
                             onClick={() => setEditingTransaction(movement.transactionId || null)}
                           >
-                            <Pencil className="h-3 w-3 text-gray-400" />
+                            <Pencil className="h-3.5 w-3.5 text-slate-400" />
                           </Button>
                         ) : null}
                       </div>
@@ -677,7 +677,7 @@ export function ExpenseTable({ activeCurrency = null }: ExpenseTableProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6"
+                          className="h-8 w-8 rounded-full"
                           onClick={() => setEditingTransaction(null)}
                           disabled={isUpdating || isStoreUpdating}
                         >
@@ -689,7 +689,7 @@ export function ExpenseTable({ activeCurrency = null }: ExpenseTableProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6 text-red-500 hover:bg-red-50 hover:text-red-700"
+                          className="h-8 w-8 rounded-full text-red-500 hover:bg-red-50 hover:text-red-700"
                           onClick={() => {
                             setTransactionToDelete(movement.transactionId || null)
                             setIsDialogOpen(true)
@@ -699,7 +699,7 @@ export function ExpenseTable({ activeCurrency = null }: ExpenseTableProps) {
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       ) : (
-                        <span className="text-xs text-gray-400">Solo lectura</span>
+                        <span className="text-xs text-slate-400">Solo lectura</span>
                       )}
                     </div>
                   </TableCell>
@@ -707,7 +707,7 @@ export function ExpenseTable({ activeCurrency = null }: ExpenseTableProps) {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center text-gray-500">
+                <TableCell colSpan={5} className="h-24 text-center text-slate-500">
                   {emptyLabel}
                 </TableCell>
               </TableRow>
@@ -716,12 +716,12 @@ export function ExpenseTable({ activeCurrency = null }: ExpenseTableProps) {
         </Table>
       </div>
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-gray-600 lg:flex-row lg:items-center lg:justify-between">
+      <div className="surface-card-soft flex flex-col gap-3 p-4 text-sm text-slate-600 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
           <p>
             Mostrando {startItem}-{endItem} de {allRows.length} movimientos
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-slate-500">
             Página {page} de {totalPages} con 20 filas por página
           </p>
         </div>
@@ -740,109 +740,123 @@ export function ExpenseTable({ activeCurrency = null }: ExpenseTableProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row">
-        <div className="relative flex-1">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <Search className="h-4 w-4 text-gray-400" />
+      <div className="surface-card p-4 sm:p-5">
+        <div className="flex flex-col gap-4 lg:flex-row">
+          <div className="relative flex-1">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+              <Search className="h-4 w-4 text-slate-400" />
+            </div>
+            <Input
+              placeholder="Buscar movimiento..."
+              className="pl-11"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
           </div>
-          <Input
-            placeholder="Buscar movimiento..."
-            className="rounded-lg border-gray-200 pl-10 focus:border-blue-500 focus:ring-blue-500"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-          />
+
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="w-full lg:w-[240px]">
+              <SelectValue placeholder="Filtrar por categoría" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas las categorías</SelectItem>
+              {categoryOptions.map((category) => {
+                const Icon = getCategoryIcon(category)
+                return (
+                  <SelectItem key={category} value={category}>
+                    <div className="flex items-center gap-2">
+                      <Icon className="h-4 w-4" style={{ color: getCategoryColor(category) }} />
+                      {category}
+                    </div>
+                  </SelectItem>
+                )
+              })}
+            </SelectContent>
+          </Select>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <SlidersHorizontal className="h-4 w-4" />
+                Filtros avanzados
+                {activeFiltersCount > 0 ? (
+                  <span className="rounded-full bg-slate-950 px-2 py-0.5 text-xs font-medium text-white">
+                    {activeFiltersCount}
+                  </span>
+                ) : null}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-slate-900">Filtros avanzados</h4>
+                  <Button variant="ghost" size="sm" onClick={resetFilters}>
+                    Limpiar
+                  </Button>
+                </div>
+
+                <div className="space-y-2">
+                  <h5 className="text-sm font-medium text-slate-900">Rango de montos</h5>
+                  <div className="pt-4">
+                    <Slider
+                      value={amountRange}
+                      min={amountBounds[0]}
+                      max={amountBounds[1]}
+                      step={1}
+                      onValueChange={(value) => setAmountRange(value as [number, number])}
+                    />
+                  </div>
+                  <div className="mt-1 flex justify-between text-xs text-slate-500">
+                    <span>{formatCurrency(amountRange[0])}</span>
+                    <span>{formatCurrency(amountRange[1])}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h5 className="text-sm font-medium text-slate-900">Rango de fechas</h5>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label htmlFor="date-start" className="text-xs">Desde</Label>
+                      <Input
+                        id="date-start"
+                        type="date"
+                        className="mt-1"
+                        value={dateRange.start}
+                        onChange={(event) => setDateRange((current) => ({ ...current, start: event.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="date-end" className="text-xs">Hasta</Label>
+                      <Input
+                        id="date-end"
+                        type="date"
+                        className="mt-1"
+                        value={dateRange.end}
+                        onChange={(event) => setDateRange((current) => ({ ...current, end: event.target.value }))}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-full rounded-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500 lg:w-[240px]">
-            <SelectValue placeholder="Filtrar por categoría" />
-          </SelectTrigger>
-          <SelectContent className="rounded-lg border-gray-200">
-            <SelectItem value="all">Todas las categorías</SelectItem>
-            {categoryOptions.map((category) => {
-              const Icon = getCategoryIcon(category)
-              return (
-                <SelectItem key={category} value={category}>
-                  <div className="flex items-center gap-2">
-                    <Icon className="h-4 w-4" style={{ color: getCategoryColor(category) }} />
-                    {category}
-                  </div>
-                </SelectItem>
-              )
-            })}
-          </SelectContent>
-        </Select>
-
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <SlidersHorizontal className="h-4 w-4" />
-              Filtros avanzados
-              {activeFiltersCount > 0 ? (
-                <span className="rounded-full bg-slate-900 px-2 py-0.5 text-xs font-medium text-white">
-                  {activeFiltersCount}
-                </span>
-              ) : null}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium">Filtros avanzados</h4>
-                <Button variant="ghost" size="sm" onClick={resetFilters}>
-                  Limpiar
-                </Button>
-              </div>
-
-              <div className="space-y-2">
-                <h5 className="text-sm font-medium">Rango de montos</h5>
-                <div className="pt-4">
-                  <Slider
-                    value={amountRange}
-                    min={amountBounds[0]}
-                    max={amountBounds[1]}
-                    step={1}
-                    onValueChange={(value) => setAmountRange(value as [number, number])}
-                  />
-                </div>
-                <div className="mt-1 flex justify-between text-xs text-gray-500">
-                  <span>{formatCurrency(amountRange[0])}</span>
-                  <span>{formatCurrency(amountRange[1])}</span>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <h5 className="text-sm font-medium">Rango de fechas</h5>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <Label htmlFor="date-start" className="text-xs">Desde</Label>
-                    <Input
-                      id="date-start"
-                      type="date"
-                      className="mt-1"
-                      value={dateRange.start}
-                      onChange={(event) => setDateRange((current) => ({ ...current, start: event.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="date-end" className="text-xs">Hasta</Label>
-                    <Input
-                      id="date-end"
-                      type="date"
-                      className="mt-1"
-                      value={dateRange.end}
-                      onChange={(event) => setDateRange((current) => ({ ...current, end: event.target.value }))}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
+        <div className="mt-4 flex flex-wrap gap-3 border-t border-slate-200/80 pt-4 text-sm">
+          <div className="rounded-full border border-emerald-100 bg-emerald-50/90 px-3 py-1.5 text-emerald-700">
+            Ingresos filtrados: <span className="font-semibold">{formatCurrency(filteredTotals.income)}</span>
+          </div>
+          <div className="rounded-full border border-rose-100 bg-rose-50/90 px-3 py-1.5 text-rose-700">
+            Gastos filtrados: <span className="font-semibold">{formatCurrency(filteredTotals.expense)}</span>
+          </div>
+          <div className={`rounded-full px-3 py-1.5 ${filteredNet >= 0 ? 'border border-sky-100 bg-sky-50/90 text-sky-700' : 'border border-amber-100 bg-amber-50/90 text-amber-700'}`}>
+            Neto filtrado: <span className="font-semibold">{filteredNet >= 0 ? formatCurrency(filteredNet) : `-${formatCurrency(Math.abs(filteredNet))}`}</span>
+          </div>
+        </div>
       </div>
 
       {activeFiltersCount > 0 ? (
-        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+        <div className="surface-card-soft flex flex-wrap items-center gap-2 p-3">
           <span className="text-sm font-medium text-slate-600">Filtros activos:</span>
 
           {hasSearchFilter ? (
@@ -981,14 +995,6 @@ export function ExpenseTable({ activeCurrency = null }: ExpenseTableProps) {
         confirmText="Eliminar"
         isLoading={isDeleting}
       />
-
-      <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-gray-600">
-        <span className="font-medium text-emerald-700">Ingresos filtrados: {formatCurrency(filteredTotals.income)}</span>
-        <span className="font-medium text-rose-700">Gastos filtrados: {formatCurrency(filteredTotals.expense)}</span>
-        <span className={`font-medium ${filteredNet >= 0 ? 'text-sky-700' : 'text-amber-700'}`}>
-          Neto filtrado: {filteredNet >= 0 ? formatCurrency(filteredNet) : `-${formatCurrency(Math.abs(filteredNet))}`}
-        </span>
-      </div>
     </div>
   )
 }

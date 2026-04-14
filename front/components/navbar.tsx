@@ -33,22 +33,26 @@ export function Navbar() {
   };
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <Link href="/" className="text-xl font-bold text-blue-600">
-                Resumidas Cuentas
-              </Link>
-            </div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+    <nav className="sticky top-0 z-40 px-3 pt-3 sm:px-4">
+      <div className="page-section max-w-6xl px-0">
+        <div className="surface-card-soft flex h-16 items-center justify-between px-4 sm:px-5">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="inline-flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 text-sm font-semibold text-white shadow-[0_16px_30px_-18px_rgba(15,23,42,0.65)]">
+                RC
+              </span>
+              <div className="hidden sm:block">
+                <p className="text-sm font-semibold tracking-tight text-slate-950">Resumidas Cuentas</p>
+                <p className="text-xs text-slate-500">Análisis financiero asistido</p>
+              </div>
+            </Link>
+            <div className="hidden sm:ml-4 sm:flex sm:items-center sm:gap-1">
               <Link
                 href="/"
-                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                className={`inline-flex items-center rounded-full px-3 py-2 text-sm font-medium transition-colors ${
                   isActive('/')
-                    ? 'border-blue-500 text-gray-900'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    ? 'bg-slate-950 text-white shadow-[0_14px_28px_-20px_rgba(15,23,42,0.7)]'
+                    : 'text-slate-500 hover:bg-white hover:text-slate-950'
                 }`}
               >
                 Analizar
@@ -57,20 +61,20 @@ export function Navbar() {
                 <>
                   <Link
                     href="/expenses"
-                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                    className={`inline-flex items-center rounded-full px-3 py-2 text-sm font-medium transition-colors ${
                       isActive('/expenses')
-                        ? 'border-blue-500 text-gray-900'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                        ? 'bg-slate-950 text-white shadow-[0_14px_28px_-20px_rgba(15,23,42,0.7)]'
+                        : 'text-slate-500 hover:bg-white hover:text-slate-950'
                     }`}
                   >
                     Gastos
                   </Link>
                   <Link
                     href="/files"
-                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                    className={`inline-flex items-center rounded-full px-3 py-2 text-sm font-medium transition-colors ${
                       isActive('/files')
-                        ? 'border-blue-500 text-gray-900'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                        ? 'bg-slate-950 text-white shadow-[0_14px_28px_-20px_rgba(15,23,42,0.7)]'
+                        : 'text-slate-500 hover:bg-white hover:text-slate-950'
                     }`}
                   >
                     Archivos
@@ -79,40 +83,41 @@ export function Navbar() {
               )}
             </div>
           </div>
-          <div className="hidden sm:ml-6 sm:flex sm:items-center">
+          <div className="hidden sm:flex sm:items-center">
             {isAuthenticated ? (
-              <div className="flex items-center space-x-4">
-                <div className="text-sm text-gray-700">
-                  <span className="font-medium">{user?.name || user?.email}</span>
+              <div className="flex items-center gap-3">
+                <div className="hidden text-right lg:block">
+                  <p className="text-sm font-medium text-slate-900">{user?.name || user?.email}</p>
+                  <p className="text-xs text-slate-500">Sesión activa</p>
                 </div>
                 <Button
                   onClick={handleLogout}
                   variant="outline"
-                  className="flex items-center text-gray-700"
+                  className="text-slate-700"
                 >
-                  <LogOut className="h-4 w-4 mr-2" />
+                  <LogOut className="h-4 w-4" />
                   Cerrar sesión
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center gap-3">
                 <Link href="/login">
-                  <Button variant="outline" className="text-gray-700">
+                  <Button variant="outline" className="text-slate-700">
                     Iniciar sesión
                   </Button>
                 </Link>
                 <Link href="/register">
-                  <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Button>
                     Registrarse
                   </Button>
                 </Link>
               </div>
             )}
           </div>
-          <div className="-mr-2 flex items-center sm:hidden">
+          <div className="flex items-center sm:hidden">
             <button
               onClick={toggleMobileMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200/80 bg-white/85 text-slate-500 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.32)] transition hover:text-slate-950 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-400"
             >
               <span className="sr-only">Abrir menú principal</span>
               {mobileMenuOpen ? (
@@ -125,16 +130,15 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="sm:hidden">
-          <div className="pt-2 pb-3 space-y-1">
+        <div className="page-section mt-3 sm:hidden">
+          <div className="surface-card-soft space-y-1 p-2">
             <Link
               href="/"
-              className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+              className={`block rounded-2xl px-4 py-3 text-base font-medium transition-colors ${
                 isActive('/')
-                  ? 'bg-blue-50 border-blue-500 text-blue-700'
-                  : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
+                  ? 'bg-slate-950 text-white'
+                  : 'text-slate-600 hover:bg-white hover:text-slate-950'
               }`}
               onClick={() => setMobileMenuOpen(false)}
             >
@@ -144,10 +148,10 @@ export function Navbar() {
               <>
                 <Link
                   href="/expenses"
-                  className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+                  className={`block rounded-2xl px-4 py-3 text-base font-medium transition-colors ${
                     isActive('/expenses')
-                      ? 'bg-blue-50 border-blue-500 text-blue-700'
-                      : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
+                      ? 'bg-slate-950 text-white'
+                      : 'text-slate-600 hover:bg-white hover:text-slate-950'
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -158,10 +162,10 @@ export function Navbar() {
                 </Link>
                 <Link
                   href="/files"
-                  className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+                  className={`block rounded-2xl px-4 py-3 text-base font-medium transition-colors ${
                     isActive('/files')
-                      ? 'bg-blue-50 border-blue-500 text-blue-700'
-                      : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
+                      ? 'bg-slate-950 text-white'
+                      : 'text-slate-600 hover:bg-white hover:text-slate-950'
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -173,24 +177,24 @@ export function Navbar() {
               </>
             )}
           </div>
-          <div className="pt-4 pb-3 border-t border-gray-200">
+          <div className="mt-3 surface-card-soft border-white/70 p-4">
             {isAuthenticated ? (
               <>
-                <div className="flex items-center px-4">
+                <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                      <User className="h-6 w-6 text-blue-600" />
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-white">
+                      <User className="h-5 w-5" />
                     </div>
                   </div>
                   <div className="ml-3">
-                    <div className="text-base font-medium text-gray-800">{user?.name || user?.email}</div>
-                    <div className="text-sm font-medium text-gray-500">{user?.email}</div>
+                    <div className="text-base font-medium text-slate-900">{user?.name || user?.email}</div>
+                    <div className="text-sm font-medium text-slate-500">{user?.email}</div>
                   </div>
                 </div>
-                <div className="mt-3 space-y-1">
+                <div className="mt-4">
                   <button
                     onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                    className="block w-full rounded-2xl px-4 py-3 text-left text-base font-medium text-slate-600 transition-colors hover:bg-white hover:text-slate-950"
                   >
                     <div className="flex items-center">
                       <LogOut className="h-5 w-5 mr-2" />
@@ -200,17 +204,17 @@ export function Navbar() {
                 </div>
               </>
             ) : (
-              <div className="space-y-1 px-4">
+              <div className="space-y-2">
                 <Link
                   href="/login"
-                  className="block py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-md"
+                  className="block rounded-2xl px-4 py-3 text-base font-medium text-slate-600 transition-colors hover:bg-white hover:text-slate-950"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Iniciar sesión
                 </Link>
                 <Link
                   href="/register"
-                  className="block py-2 text-base font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md"
+                  className="block rounded-2xl bg-slate-950 px-4 py-3 text-base font-medium text-white shadow-[0_18px_36px_-24px_rgba(15,23,42,0.65)]"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Registrarse

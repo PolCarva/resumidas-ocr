@@ -5,13 +5,14 @@ import { PageHeader } from "@/components/page-header";
 
 export default function TermsPage() {
   return (
-    <Container>
+    <main className="page-shell pb-10">
+      <Container>
       <PageHeader
         title="Términos de Servicio"
         description="Condiciones de uso de Resumidas Cuentas"
       />
 
-      <div className="prose flex flex-col gap-4 prose-blue max-w-none mt-8">
+      <div className="legal-prose">
         <h2>1. Introducción</h2>
         <p>
           Bienvenido a Resumidas Cuentas. Estos Términos de Servicio rigen tu uso de nuestra aplicación web, 
@@ -29,19 +30,19 @@ export default function TermsPage() {
         </p>
 
         <h2>3. Descargo de Responsabilidad sobre el Uso de IA</h2>
-        <div className="bg-amber-50 border-l-4 border-amber-500 p-4 my-4">
-          <h3 className="text-amber-800 font-medium">Importante: Uso de Inteligencia Artificial</h3>
-          <p className="text-amber-700">
+        <div className="legal-highlight">
+          <h3 className="font-medium text-amber-900">Importante: Uso de Inteligencia Artificial</h3>
+          <p className="text-amber-800">
             Resumidas Cuentas utiliza tecnologías de Inteligencia Artificial para analizar y categorizar tus datos financieros. 
             A pesar de nuestros esfuerzos por garantizar la precisión, debes tener en cuenta que:
           </p>
-          <ul className="list-disc pl-5 text-amber-700">
+          <ul className="list-disc pl-5 text-amber-800">
             <li>Los sistemas de IA pueden interpretar incorrectamente ciertos datos o transacciones.</li>
             <li>Las categorizaciones y análisis generados son aproximaciones y pueden contener errores.</li>
             <li>La información proporcionada no constituye asesoramiento financiero profesional.</li>
             <li>Siempre debes verificar manualmente los resultados importantes antes de tomar decisiones financieras.</li>
           </ul>
-          <p className="text-amber-700 font-medium mt-2">
+          <p className="mt-2 font-medium text-amber-900">
             Al utilizar esta aplicación, aceptas que la información generada por IA es solo una herramienta de apoyo 
             y no reemplaza el criterio humano o el asesoramiento financiero profesional.
           </p>
@@ -94,10 +95,11 @@ export default function TermsPage() {
           de contacto o enviando un correo electrónico a info@resumidascuentas.com.
         </p>
 
-        <p className="text-sm text-gray-500 mt-8">
+        <p className="mt-8 text-sm text-slate-500">
           Última actualización: {new Date().toLocaleDateString('es-ES')}
         </p>
       </div>
-    </Container>
+      </Container>
+    </main>
   );
 } 

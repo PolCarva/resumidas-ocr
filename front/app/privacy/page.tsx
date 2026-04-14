@@ -5,13 +5,14 @@ import { PageHeader } from "@/components/page-header";
 
 export default function PrivacyPage() {
   return (
-    <Container>
+    <main className="page-shell pb-10">
+      <Container>
       <PageHeader
         title="Política de Privacidad"
         description="Cómo protegemos tus datos en Resumidas Cuentas"
       />
 
-      <div className="prose flex flex-col gap-4 prose-blue max-w-none mt-8">
+      <div className="legal-prose">
         <h2>1. Introducción</h2>
         <p>
           En Resumidas Cuentas, nos tomamos muy en serio la protección de tus datos personales y financieros. 
@@ -42,19 +43,19 @@ export default function PrivacyPage() {
         </ul>
 
         <h2>4. Descargo de Responsabilidad sobre el Uso de IA</h2>
-        <div className="bg-amber-50 border-l-4 border-amber-500 p-4 my-4">
-          <h3 className="text-amber-800 font-medium">Importante: Procesamiento de Datos mediante IA</h3>
-          <p className="text-amber-700">
+        <div className="legal-highlight">
+          <h3 className="font-medium text-amber-900">Importante: Procesamiento de Datos mediante IA</h3>
+          <p className="text-amber-800">
             Resumidas Cuentas utiliza tecnologías de Inteligencia Artificial para procesar y analizar tus datos financieros. 
             En relación con este procesamiento, debes tener en cuenta que:
           </p>
-          <ul className="list-disc pl-5 text-amber-700">
+          <ul className="list-disc pl-5 text-amber-800">
             <li>Los sistemas de IA pueden interpretar incorrectamente ciertos datos, lo que podría resultar en categorizaciones o análisis imprecisos.</li>
             <li>Aunque implementamos medidas de seguridad robustas, el procesamiento mediante IA implica ciertos riesgos inherentes relacionados con la precisión de los datos.</li>
             <li>Tus datos son utilizados para entrenar y mejorar nuestros modelos de IA, siempre de forma anonimizada y agregada.</li>
             <li>Puedes solicitar en cualquier momento que tus datos no sean utilizados para el entrenamiento de nuestros modelos de IA.</li>
           </ul>
-          <p className="text-amber-700 font-medium mt-2">
+          <p className="mt-2 font-medium text-amber-900">
             Al utilizar esta aplicación, aceptas que tus datos sean procesados mediante tecnologías de IA con las limitaciones mencionadas anteriormente.
           </p>
         </div>
@@ -111,10 +112,11 @@ export default function PrivacyPage() {
           privacy@resumidascuentas.com.
         </p>
 
-        <p className="text-sm text-gray-500 mt-8">
+        <p className="mt-8 text-sm text-slate-500">
           Última actualización: {new Date().toLocaleDateString('es-ES')}
         </p>
       </div>
-    </Container>
+      </Container>
+    </main>
   );
 } 

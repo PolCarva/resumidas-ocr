@@ -270,7 +270,8 @@ export default function ExpensesPage() {
   }, [error, fileError, initialLoadComplete]);
 
   return (
-    <main className="container mx-auto py-8 px-4 space-y-8">
+    <main className="page-shell pb-10">
+      <div className="page-section space-y-6">
       {showError && error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -280,43 +281,48 @@ export default function ExpensesPage() {
       )}
       
       {isLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="surface-card flex items-center justify-center py-16">
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
+            <p className="text-sm font-medium text-slate-500">Cargando información financiera...</p>
+          </div>
         </div>
       ) : (
         <>
           {!error && transactions.length > 0 && isAuthenticated && user && (!dataUserId || dataUserId === user.id) ? (
             <>
               {availableCurrencies.length > 0 ? (
-                <Tabs
-                  value={effectiveActiveCurrency || availableCurrencies[0]}
-                  onValueChange={(value) => setActiveCurrency(value as 'UYU' | 'USD' | 'UNKNOWN')}
-                  className="w-full"
-                >
-                  <TabsList
-                    className={`grid w-full max-w-sm mb-2 ${
-                      availableCurrencies.length === 1
-                        ? 'grid-cols-1'
-                        : availableCurrencies.length === 2
-                          ? 'grid-cols-2'
-                          : 'grid-cols-3'
-                    }`}
+                <div className="flex justify-end">
+                  <Tabs
+                    value={effectiveActiveCurrency || availableCurrencies[0]}
+                    onValueChange={(value) => setActiveCurrency(value as 'UYU' | 'USD' | 'UNKNOWN')}
+                    className="w-full max-w-sm"
                   >
-                    {availableCurrencies.map((currency) => (
-                      <TabsTrigger key={currency} value={currency}>
-                        {currency}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                </Tabs>
+                    <TabsList
+                      className={`grid w-full ${
+                        availableCurrencies.length === 1
+                          ? 'grid-cols-1'
+                          : availableCurrencies.length === 2
+                            ? 'grid-cols-2'
+                            : 'grid-cols-3'
+                      }`}
+                    >
+                      {availableCurrencies.map((currency) => (
+                        <TabsTrigger key={currency} value={currency}>
+                          {currency}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </Tabs>
+                </div>
               ) : null}
               <ExpenseSummary activeCurrency={effectiveActiveCurrency} />
               <ExpenseTable activeCurrency={effectiveActiveCurrency} />
             </>
           ) : (
-            <div className="text-center py-12">
-              <h2 className="text-xl font-semibold mb-2">No hay datos disponibles</h2>
-              <p className="text-muted-foreground">
+            <div className="surface-card py-16 text-center">
+              <h2 className="text-xl font-semibold text-slate-950">No hay datos disponibles</h2>
+              <p className="mt-3 text-base leading-7 text-slate-500">
                 {error ? 
                   "Se ha producido un error al cargar los datos." : 
                   "No se encontraron transacciones. Añade nuevas transacciones o importa datos para comenzar."
@@ -326,6 +332,7 @@ export default function ExpensesPage() {
           )}
         </>
       )}
+      </div>
     </main>
   );
 }

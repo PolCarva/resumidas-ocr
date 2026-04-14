@@ -5,6 +5,26 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACK_PID=""
 FRONT_PID=""
 
+stop_matching_processes() {
+  local pattern="$1"
+  local pids
+  pids="$(pgrep -f "$pattern" 2>/dev/null || true)"
+
+  if [ -z "$pids" ]; then
+    return
+  fi
+
+  echo "Cerrando procesos previos para: $pattern"
+  kill $pids 2>/dev/null || true
+  sleep 1
+
+  local remaining
+  remaining="$(pgrep -f "$pattern" 2>/dev/null || true)"
+  if [ -n "$remaining" ]; then
+    kill -9 $remaining 2>/dev/null || true
+  fi
+}
+
 stop_port_listener() {
   local port="$1"
   local pids
@@ -39,6 +59,7 @@ trap cleanup EXIT INT TERM
 
 echo "Levantando backend y frontend de OCR Free..."
 
+stop_matching_processes "$PROJECT_DIR/front/node_modules/.bin/next dev"
 stop_port_listener 3000
 stop_port_listener 3001
 stop_port_listener 8000

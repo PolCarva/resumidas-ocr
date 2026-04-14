@@ -354,243 +354,207 @@ export function UploadForm() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full max-w-2xl mx-auto"
+      className="w-full"
     >
-      {!isAuthenticated && (
-        <Alert className="mb-4 bg-amber-50 border-amber-200">
-          <AlertCircle className="h-4 w-4 text-amber-600" />
-          <AlertDescription className="text-amber-800">
-            Debes iniciar sesión para analizar extractos bancarios.{" "}
-            <Button
-              variant="link"
-              className="p-0 h-auto text-amber-800 font-semibold underline"
-              onClick={() => router.push('/login')}
-            >
-              Iniciar sesión
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {error && (
-        <Alert className="mb-4 bg-red-50 border-red-200">
-          <AlertCircle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-800">
-            Hubo un error al procesar el archivo.
-            {error.includes('demasiado grande') || error.includes('demasiado largo') ? (
-              <div className="mt-2 text-sm">
-                <p>Sugerencias:</p>
-                <ul className="list-disc pl-5 mt-1">
-                  <li>Intenta con un archivo más pequeño (PDF o imagen)</li>
-                  <li>Si es PDF, reduce el número de páginas del extracto</li>
-                  <li>Si es imagen, prueba una captura más nítida y recortada</li>
-                </ul>
-              </div>
-            ) : null}
-            {analysisState === AnalysisState.ERROR && (
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => {
-                    setError(null);
-                    setAnalysisState(AnalysisState.IDLE);
-                    setFile(null);
-                  }}
-                >
-                  Intentar de nuevo
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-white hover:bg-gray-100 text-gray-800 border-gray-300"
-                  onClick={() => router.push('/files')}
-                >
-                  Ver mis archivos
-                </Button>
-              </div>
-            )}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {wasJsonRepaired && !error && (
-        <Alert variant="warning" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Hubo un problema con el formato de la respuesta, pero se ha reparado automáticamente.
-            Si notas algún problema en los datos, por favor contacta al soporte.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {modelInfo && !error && (
-        <Alert variant="default" className="mb-4 bg-blue-50 border-blue-100">
-          <Sparkles className="h-4 w-4 text-blue-600" />
-          <AlertDescription className="text-blue-800">
-            Análisis realizado con el modelo <span className="font-semibold">{modelInfo}</span>.
-            {wasJsonRepaired && (
-              <span className="ml-1 text-amber-600">
-                (Se aplicó reparación automática al formato de respuesta)
-              </span>
-            )}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {pagesInfo && !error && analysisState !== AnalysisState.COMPLETED && (
-        <Alert variant="default" className="mb-4 bg-blue-50 border-blue-100">
-          <FileDigit className="h-4 w-4 text-blue-600" />
-          <AlertDescription className="text-blue-800">
-            Procesando extracto de <span className="font-semibold">{pagesInfo.total}</span> páginas. 
-            {pagesInfo.processed < pagesInfo.total ? (
-              <span> Completado: <span className="font-semibold">{pagesInfo.processed}</span> de {pagesInfo.total} páginas.</span>
-            ) : (
-              <span> Todas las páginas han sido procesadas.</span>
-            )}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <div
-        {...getRootProps()}
-        className={`
-          relative overflow-hidden rounded-xl p-8 text-center cursor-pointer transition-all duration-300
-          ${!isAuthenticated ? 'opacity-60 pointer-events-none' : ''}
-          ${isDragActive && isAuthenticated
-            ? "bg-gradient-to-r from-blue-100/80 to-indigo-100/80 border-2 border-dashed border-blue-400 shadow-lg"
-            : "bg-white border-2 border-dashed border-gray-200 shadow-md hover:shadow-lg hover:border-blue-300"
-          }
-        `}
-      >
-        <input {...getInputProps()} />
-
+      <div className="space-y-4">
         {!isAuthenticated && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100/50 backdrop-blur-sm z-10">
-            <div className="flex flex-col items-center">
-              <Lock className="h-8 w-8 text-gray-500 mb-2" />
-              <p className="text-gray-700 font-medium">Inicia sesión para subir archivos</p>
-            </div>
-          </div>
+          <Alert>
+            <AlertCircle className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="text-amber-800">
+              Debes iniciar sesión para analizar extractos bancarios.{" "}
+              <Button
+                variant="link"
+                className="h-auto p-0 font-semibold text-amber-800 underline"
+                onClick={() => router.push('/login')}
+              >
+                Iniciar sesión
+              </Button>
+            </AlertDescription>
+          </Alert>
         )}
 
-        {isDragActive && isAuthenticated ? (
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="flex flex-col items-center"
-          >
-            <div className="w-16 h-16 mb-4 rounded-full bg-blue-100 flex items-center justify-center">
-              <Upload className="h-8 w-8 text-blue-600" />
-            </div>
-            <h3 className="text-xl font-medium mb-2 text-blue-700">¡Suelta el archivo aquí!</h3>
-            <p className="text-blue-500">Estamos listos para procesar tu extracto</p>
-          </motion.div>
-        ) : (
-          <div className="flex flex-col items-center">
-            <div className="w-16 h-16 mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-              <Upload className="h-8 w-8 text-gray-500" />
-            </div>
-            <h3 className="text-xl font-medium mb-2 text-gray-800">Arrastra y suelta tu extracto bancario</h3>
-            <p className="text-gray-500 mb-4">O haz clic para seleccionar un archivo PDF o una imagen</p>
-            {file && (
-              <div className="flex items-center justify-center gap-2 text-sm font-medium text-blue-600 bg-blue-50 px-4 py-2 rounded-full">
-                <FileText className="h-4 w-4" />
-                {file.name}
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-800">
+              Hubo un error al procesar el archivo.
+              {error.includes('demasiado grande') || error.includes('demasiado largo') ? (
+                <div className="mt-2 text-sm">
+                  <p>Sugerencias:</p>
+                  <ul className="mt-1 list-disc pl-5">
+                    <li>Intenta con un archivo más pequeño</li>
+                    <li>Reduce páginas si es PDF</li>
+                    <li>Usa una imagen más nítida</li>
+                  </ul>
+                </div>
+              ) : null}
+              {analysisState === AnalysisState.ERROR ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setError(null)
+                      setAnalysisState(AnalysisState.IDLE)
+                      setFile(null)
+                    }}
+                  >
+                    Intentar de nuevo
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => router.push('/files')}
+                  >
+                    Ver mis archivos
+                  </Button>
+                </div>
+              ) : null}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {wasJsonRepaired && !error ? (
+          <Alert variant="warning">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Se reparó automáticamente el formato de la respuesta.
+            </AlertDescription>
+          </Alert>
+        ) : null}
+
+        {modelInfo && !error ? (
+          <Alert>
+            <Sparkles className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              Análisis realizado con <span className="font-semibold">{modelInfo}</span>.
+            </AlertDescription>
+          </Alert>
+        ) : null}
+
+        {pagesInfo && !error && analysisState !== AnalysisState.COMPLETED ? (
+          <Alert>
+            <FileDigit className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              Página {pagesInfo.processed} de {pagesInfo.total}.
+            </AlertDescription>
+          </Alert>
+        ) : null}
+
+        <div
+          {...getRootProps()}
+          className={`
+            group relative overflow-hidden rounded-[2rem] border p-10 text-center transition-all duration-300 sm:p-12
+            ${!isAuthenticated ? 'pointer-events-none opacity-60' : ''}
+            ${isDragActive && isAuthenticated
+              ? "border-sky-400 bg-[linear-gradient(135deg,rgba(219,234,254,0.92),rgba(239,246,255,0.98))] shadow-[0_28px_60px_-34px_rgba(14,165,233,0.35)]"
+              : "border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(248,250,252,0.92))] shadow-[0_28px_70px_-42px_rgba(15,23,42,0.42)]"
+            }
+          `}
+        >
+          <input {...getInputProps()} />
+          <div className="absolute inset-0 bg-grid-soft opacity-60" />
+
+          {!isAuthenticated ? (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-100/70 backdrop-blur-sm">
+              <div className="flex flex-col items-center">
+                <Lock className="mb-2 h-8 w-8 text-slate-500" />
+                <p className="font-medium text-slate-700">Inicia sesión para subir archivos</p>
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          ) : null}
 
-        {/* Decorative elements */}
-        <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-blue-100 rounded-full opacity-30" />
-        <div className="absolute -top-6 -left-6 w-16 h-16 bg-indigo-100 rounded-full opacity-30" />
-      </div>
-
-      {loading && (
-        <div className="mt-6 space-y-2">
-          <div className="flex justify-between items-center">
-            <motion.div 
-              key={analysisMessage || getStatusMessage()}
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="flex items-center gap-2 text-sm font-medium text-gray-700"
+          {isDragActive && isAuthenticated ? (
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="relative flex flex-col items-center"
             >
-              {analysisState === AnalysisState.ANALYZING && (
-                <motion.div
-                  animate={{ y: [0, -5, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  <Sparkles className="h-4 w-4 text-blue-500" />
-                </motion.div>
-              )}
-              {analysisState === AnalysisState.COMPLETED && (
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                >
-                  <Sparkles className="h-4 w-4 text-green-500" />
-                </motion.div>
-              )}
-              {getStatusMessage()}
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-sky-100 text-sky-700">
+                <Upload className="h-8 w-8" />
+              </div>
+              <h2 className="text-2xl font-semibold tracking-tight text-sky-800">Suelta el archivo</h2>
             </motion.div>
-            <span className="text-sm font-medium text-gray-700">{progress.toFixed(0)}%</span>
-          </div>
-          <Progress 
-            value={progress} 
-            className={`h-2 ${analysisState === AnalysisState.COMPLETED ? 'bg-green-100' : ''}`}
-          />
-          {pagesInfo && analysisState === AnalysisState.ANALYZING && (
-            <div className="flex justify-between items-center text-xs text-gray-500 pt-1">
-              <span>Página {pagesInfo.processed} de {pagesInfo.total}</span>
-              <span>{Math.round((pagesInfo.processed / pagesInfo.total) * 100)}% completado</span>
+          ) : (
+            <div className="relative flex flex-col items-center">
+              <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition group-hover:bg-slate-950 group-hover:text-white">
+                <Upload className="h-8 w-8" />
+              </div>
+              <h2 className="text-2xl font-semibold tracking-tight text-slate-950">Sube tu extracto</h2>
+              <p className="mt-2 text-sm text-slate-500">PDF o imagen</p>
+              {file ? (
+                <div className="mt-5 flex items-center justify-center gap-2 rounded-full border border-sky-100 bg-sky-50 px-4 py-2 text-sm font-medium text-sky-700">
+                  <FileText className="h-4 w-4" />
+                  {file.name}
+                </div>
+              ) : null}
             </div>
           )}
         </div>
-      )}
 
-      <div className="mt-6 flex justify-center">
+        {loading ? (
+          <div className="surface-card-soft space-y-3 p-4">
+            <div className="flex items-center justify-between">
+              <motion.div
+                key={analysisMessage || getStatusMessage()}
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="flex items-center gap-2 text-sm font-medium text-slate-700"
+              >
+                {analysisState === AnalysisState.ANALYZING ? (
+                  <motion.div
+                    animate={{ y: [0, -5, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <Sparkles className="h-4 w-4 text-sky-500" />
+                  </motion.div>
+                ) : null}
+                {analysisState === AnalysisState.COMPLETED ? (
+                  <Sparkles className="h-4 w-4 text-emerald-500" />
+                ) : null}
+                {getStatusMessage()}
+              </motion.div>
+              <span className="text-sm font-medium text-slate-700">{progress.toFixed(0)}%</span>
+            </div>
+            <Progress value={progress} className={analysisState === AnalysisState.COMPLETED ? 'bg-green-100' : ''} />
+          </div>
+        ) : null}
+
         <Button
           onClick={handleSubmit}
           disabled={!file || loading || !isAuthenticated}
           className={`
-            w-full sm:w-auto px-8 py-6 rounded-xl text-lg font-medium
+            w-full py-6 text-lg font-medium
             ${!file || !isAuthenticated
-              ? "bg-gray-200 text-gray-500"
+              ? "bg-slate-200 text-slate-500"
               : analysisState === AnalysisState.COMPLETED
-                ? "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-md hover:shadow-lg"
-                : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg"
+                ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700"
+                : "bg-gradient-to-r from-slate-950 via-slate-900 to-sky-700 text-white hover:from-slate-900 hover:to-sky-800"
             }
           `}
         >
           {loading ? (
-            <motion.div 
+            <motion.div
               className="flex items-center"
-              animate={{ 
-                opacity: analysisState === AnalysisState.COMPLETED ? 1 : [0.8, 1, 0.8] 
-              }}
+              animate={{ opacity: analysisState === AnalysisState.COMPLETED ? 1 : [0.8, 1, 0.8] }}
               transition={{ duration: 1.5, repeat: Infinity }}
             >
               {analysisState === AnalysisState.COMPLETED ? (
                 <>
                   <Sparkles className="mr-2 h-5 w-5 text-white" />
-                  ¡Completado!
+                  Completado
                 </>
               ) : (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  {analysisState === AnalysisState.ANALYZING && pagesInfo ? 
-                    `Analizando página ${pagesInfo.processed}/${pagesInfo.total}...` : 
-                    "Analizando..."}
+                  Analizando...
                 </>
               )}
             </motion.div>
           ) : (
             <>
               Analizar Gastos
-              <ArrowRight className="ml-2 h-5 w-5" />
+              <ArrowRight className="h-5 w-5" />
             </>
           )}
         </Button>

@@ -220,35 +220,38 @@ const SortableAnalysisItem = memo(function SortableAnalysisItem({ analysis, onVi
       ref={setNodeRef}
       onClick={handleView}
       style={style}
-      className={`bg-white rounded-xl cursor-pointer shadow-md p-4 sm:p-6 relative ${
-        isDragging ? 'shadow-lg ring-2 ring-blue-300' : 'hover:shadow-lg hover:bg-blue-50'
+      className={`group relative cursor-pointer overflow-hidden rounded-[1.5rem] border p-4 shadow-[0_22px_55px_-36px_rgba(15,23,42,0.38)] transition-all duration-200 sm:p-5 ${
+        isDragging
+          ? 'border-sky-200 bg-white shadow-[0_28px_70px_-34px_rgba(59,130,246,0.35)] ring-2 ring-sky-200/80'
+          : 'border-white/80 bg-white/88 backdrop-blur hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-[0_30px_70px_-38px_rgba(15,23,42,0.42)]'
       }`}
     >
       {!isDragging && (
-        <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-blue-200 pointer-events-none"></div>
+        <div className="pointer-events-none absolute inset-0 rounded-[1.5rem] border border-transparent group-hover:border-slate-200"></div>
       )}
+      <div className="absolute -right-8 top-0 h-24 w-24 rounded-full bg-sky-100/65 blur-3xl" />
       <div className="flex flex-col sm:flex-row items-start gap-4">
         <div className="flex items-start w-full">
           <div 
             {...attributes}
             {...listeners}
-            className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-gray-100 self-center mr-1"
+            className="mr-1 self-center rounded-xl p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 cursor-grab active:cursor-grabbing"
             title="Arrastrar para reordenar"
           >
-            <GripVertical className={`h-5 w-5 ${isDragging ? 'text-blue-500' : 'text-gray-400'}`} />
+            <GripVertical className={`h-5 w-5 ${isDragging ? 'text-sky-500' : ''}`} />
           </div>
           <div 
-            className={`p-3 rounded-lg ${colorClasses.bg} mr-3`}
+            className={`mr-4 rounded-[1.15rem] p-3 ${colorClasses.bg} shadow-[0_18px_30px_-26px_rgba(15,23,42,0.35)]`}
           >
             {icon}
           </div>
           <div className="cursor-pointer flex-1">
-            <h3 className="text-lg font-medium text-gray-800">{analysis.fileName}</h3>
-            <div className="mt-1 flex items-center text-sm text-gray-500">
+            <h3 className="text-lg font-semibold tracking-tight text-slate-900">{analysis.fileName}</h3>
+            <div className="mt-1 flex items-center text-sm text-slate-500">
               <FileText className="h-4 w-4 mr-1" />
               {analysis.originalFileName || 'Archivo sin nombre'}
             </div>
-            <div className="mt-1 text-xs text-gray-400">
+            <div className="mt-2 text-xs uppercase tracking-[0.18em] text-slate-400">
               Creado el {formattedDate}
             </div>
           </div>
@@ -256,7 +259,7 @@ const SortableAnalysisItem = memo(function SortableAnalysisItem({ analysis, onVi
         <div className="flex flex-row sm:flex-row gap-2 w-full sm:w-auto mt-3 sm:mt-0 justify-end">
           <Button
             variant="outline"
-            className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 flex-1 sm:flex-none"
+            className="flex-1 sm:flex-none"
             onClick={(e) => {
               e.stopPropagation();
               handleEdit();
@@ -267,7 +270,7 @@ const SortableAnalysisItem = memo(function SortableAnalysisItem({ analysis, onVi
           </Button>
           <Button
             variant="outline"
-            className="text-red-600 hover:text-red-800 hover:bg-red-50 flex-1 sm:flex-none"
+            className="flex-1 border-red-200/70 text-red-600 hover:bg-red-50 hover:text-red-700 sm:flex-none"
             onClick={(e) => {
               e.stopPropagation();
               handleDelete();
@@ -573,25 +576,25 @@ export default function AnalysisHistoryPage() {
   };
 
   return (
-    <main className="min-h-screen p-4 sm:p-6 bg-gradient-to-b from-blue-50 to-indigo-50">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between flex-col md:flex-row items-center mb-6 sm:mb-8 gap-4 md:gap-0">
-          <h1 className="text-2xl sm:text-3xl font-bold text-center md:text-left text-gray-800">Historial de Análisis</h1>
+    <main className="page-shell pb-10">
+      <div className="page-section space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Archivos</h1>
           <Link href="/">
-            <Button className="bg-blue-600 hover:bg-blue-700 w-full md:w-auto">
+            <Button className="w-full sm:w-auto">
               Analizar Nuevo Extracto
             </Button>
           </Link>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-lg">
-            <p className="text-red-800">{error}</p>
-          </div>
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
         
         {successMessage && (
-          <Alert className="mb-6 bg-green-50 border-green-200">
+          <Alert variant="success">
             <CheckCircle2 className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-700">
               {successMessage}
@@ -600,29 +603,25 @@ export default function AnalysisHistoryPage() {
         )}
 
         {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-            <span className="ml-2 text-lg text-gray-600">Cargando historial...</span>
+          <div className="surface-card flex h-64 items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="h-8 w-8 animate-spin text-sky-600" />
+              <span className="text-lg text-slate-600">Cargando historial...</span>
+            </div>
           </div>
         ) : analyses.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-md p-6 sm:p-8 text-center">
-            <FileText className="h-12 sm:h-16 w-12 sm:w-16 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-xl font-medium text-gray-700 mb-2">No hay análisis en tu historial</h3>
-            <p className="text-gray-500 mb-6">Comienza subiendo tu primer extracto bancario</p>
+          <div className="surface-card p-8 text-center sm:p-10">
+            <FileText className="mx-auto mb-4 h-12 w-12 text-slate-400 sm:h-16 sm:w-16" />
+            <h3 className="text-xl font-semibold tracking-tight text-slate-900">No hay análisis en tu historial</h3>
+            <p className="mx-auto mt-3 max-w-xl text-base leading-7 text-slate-500">Comienza subiendo tu primer extracto bancario.</p>
             <Link href="/">
-              <Button className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
+              <Button className="mt-6 w-full sm:w-auto">
                 Subir Extracto
               </Button>
             </Link>
           </div>
         ) : (
           <>
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-lg flex items-center text-blue-700">
-              <GripVertical className="h-5 w-5 mr-2 flex-shrink-0" />
-              <span>
-                <strong>Consejo:</strong> Puedes arrastrar los análisis para reordenarlos según tus preferencias.
-              </span>
-            </div>
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
@@ -684,17 +683,7 @@ export default function AnalysisHistoryPage() {
         
         {/* Diálogo para editar análisis */}
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
-            <button 
-              onClick={() => setEditDialogOpen(false)} 
-              className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-              <span className="sr-only">Cerrar</span>
-            </button>
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[520px]">
             <DialogHeader>
               <DialogTitle className="text-xl">Editar análisis</DialogTitle>
               <DialogDescription>
@@ -772,22 +761,22 @@ export default function AnalysisHistoryPage() {
               </div>
               
               <div className="mt-4">
-                <h4 className="text-sm font-medium mb-3 text-gray-700">Vista previa:</h4>
-                <div className="p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+                <h4 className="mb-3 text-sm font-medium text-slate-700">Vista previa:</h4>
+                <div className="surface-card-soft p-4">
                   <div className="flex items-start space-x-4">
                     <div className={`p-3 rounded-lg ${getColorClasses(editedColor).bg}`}>
                       {renderIcon(editedIcon, getColorClasses(editedColor).text)}
                     </div>
                     <div>
-                      <div className="font-medium text-gray-800 text-lg">{editedName || 'Nombre del análisis'}</div>
+                      <div className="text-lg font-medium text-slate-800">{editedName || 'Nombre del análisis'}</div>
                       {analysisToEdit?.originalFileName && (
-                        <div className="mt-1 flex items-center text-sm text-gray-500">
+                        <div className="mt-1 flex items-center text-sm text-slate-500">
                           <FileText className="h-4 w-4 mr-1" />
                           {analysisToEdit.originalFileName}
                         </div>
                       )}
                       {analysisToEdit?.createdAt && (
-                        <div className="mt-1 text-xs text-gray-400">
+                        <div className="mt-1 text-xs uppercase tracking-[0.18em] text-slate-400">
                           Creado el {formatDate(analysisToEdit.createdAt)}
                         </div>
                       )}
@@ -800,13 +789,12 @@ export default function AnalysisHistoryPage() {
               <Button 
                 variant="outline" 
                 onClick={() => setEditDialogOpen(false)}
-                className="border-gray-300 hover:bg-gray-50 hover:text-gray-800"
+                className="hover:text-slate-800"
               >
                 Cancelar
               </Button>
               <Button 
-                onClick={confirmEdit} 
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={confirmEdit}
               >
                 Guardar cambios
               </Button>

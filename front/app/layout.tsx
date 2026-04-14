@@ -1,9 +1,8 @@
 import type { Viewport, Metadata } from "next";
 import localFont from "next/font/local";
-import Link from "next/link";
 import "./globals.css";
 import { AuthMiddleware } from "@/lib/auth-middleware";
-import { Navbar } from "@/components/navbar";
+import { AppShell } from "@/components/app-shell";
 import { Toaster } from 'sonner'
 
 const geistSans = localFont({
@@ -68,23 +67,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthMiddleware>
-          <div className="flex flex-col min-h-screen">
-            <Navbar />
-            <main className="flex-grow">
-              {children}
-            </main>
-            <footer className="py-6 bg-gray-50 border-t border-gray-100">
-              <div className="container mx-auto px-4 text-center text-gray-500 text-sm">
-                <p>© {new Date().getFullYear()} Resumidas Cuentas. Todos los derechos reservados.</p>
-                <p>Desarrollado con ❤️ por <Link target="_blank" href="https://linkedin.com/in/pablo-carvalho-gimenez" className="hover:text-blue-600 transition-colors">Pablo Carvalho</Link></p>
-                <p className="mt-2">
-                  <Link href="/privacy" className="hover:text-blue-600 transition-colors">Política de Privacidad</Link>
-                  {" · "}
-                  <Link href="/terms" className="hover:text-blue-600 transition-colors">Términos de Servicio</Link>
-                </p>
-              </div>
-            </footer>
-          </div>
+          <AppShell>{children}</AppShell>
         </AuthMiddleware>
         <Toaster position="top-right" richColors />
       </body>

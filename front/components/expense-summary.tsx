@@ -104,7 +104,7 @@ function StatCard({
     <div className={`rounded-[1.4rem] border p-4 shadow-[0_16px_40px_-28px_rgba(15,23,42,0.45)] backdrop-blur ${toneStyles[tone]}`}>
       <p className="text-[0.68rem] uppercase tracking-[0.24em]">{label}</p>
       <p className="mt-3 text-2xl font-semibold text-slate-950">{value}</p>
-      <p className="mt-2 text-sm text-slate-600">{caption}</p>
+      {caption ? <p className="mt-2 text-sm text-slate-600">{caption}</p> : null}
     </div>
   )
 }
@@ -406,9 +406,6 @@ export function ExpenseSummary({ activeCurrency = null }: ExpenseSummaryProps) {
               <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950">
                 {periodTitle}
               </h2>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-                Una lectura más clara del período: cuánto entró, cuánto salió, cómo evolucionó el saldo y en qué categorías se concentró el gasto.
-              </p>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:min-w-[620px] xl:grid-cols-4">
@@ -416,27 +413,27 @@ export function ExpenseSummary({ activeCurrency = null }: ExpenseSummaryProps) {
                 label="Ingresos"
                 value={formatMoney(totals.income)}
                 tone="emerald"
-                caption="Entradas acumuladas del período."
+                caption=""
               />
               <StatCard
                 label="Gastos"
                 value={formatMoney(totals.expense)}
                 tone="rose"
-                caption="Salidas registradas y categorizadas."
+                caption=""
               />
               <StatCard
                 label="Resultado"
                 value={isProfit ? formatMoney(netResult) : `-${formatMoney(Math.abs(netResult))}`}
                 tone={isProfit ? "sky" : "amber"}
-                caption={isProfit ? "El período cerró arriba." : "El gasto superó al ingreso."}
+                caption=""
               />
               <StatCard
                 label="Mayor categoría"
                 value={topCategory?.name || "Sin datos"}
                 tone="sky"
                 caption={topCategory && totals.expense > 0
-                  ? `${((topCategory.value / totals.expense) * 100).toFixed(0)}% del gasto total.`
-                  : "Todavía no hay gasto suficiente para rankear."}
+                  ? `${((topCategory.value / totals.expense) * 100).toFixed(0)}% del gasto`
+                  : ""}
               />
             </div>
           </div>
@@ -474,10 +471,7 @@ export function ExpenseSummary({ activeCurrency = null }: ExpenseSummaryProps) {
                   <div className="absolute -right-12 top-0 h-32 w-32 rounded-full bg-emerald-100/60 blur-3xl" />
                   <div className="relative">
                     <h3 className="text-lg font-semibold text-slate-950">Distribución de gastos</h3>
-                    <p className="mt-1 text-sm text-slate-500">
-                      La dona prioriza lectura rápida: centro limpio, colores por categoría y detalle fino en el panel lateral.
-                    </p>
-                    <div className="relative mt-6 h-80">
+                    <div className="relative mt-5 h-80">
                       {categoryData.length > 0 ? pieChartComponent : (
                         <div className="flex h-full items-center justify-center">
                           <p className="text-slate-500">No hay gastos categorizados para mostrar.</p>
@@ -501,14 +495,11 @@ export function ExpenseSummary({ activeCurrency = null }: ExpenseSummaryProps) {
                   <div className="absolute -left-10 bottom-0 h-28 w-28 rounded-full bg-sky-100/60 blur-3xl" />
                   <div className="relative flex h-full flex-col">
                     <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <h3 className="text-lg font-semibold text-slate-950">Peso por categoría</h3>
-                        <p className="mt-1 text-sm text-slate-500">Cuánto aporta cada rubro al total gastado.</p>
-                      </div>
+                      <h3 className="text-lg font-semibold text-slate-950">Peso por categoría</h3>
                     </div>
 
                     {categoryData.length > 0 ? (
-                      <div className="mt-6 flex-1 overflow-hidden">
+                      <div className="mt-5 flex-1 overflow-hidden">
                         <div className="h-full max-h-[26rem] space-y-3 overflow-y-auto pr-1">
                         {categoryData.map((category) => {
                           const share = totals.expense > 0 ? (category.value / totals.expense) * 100 : 0
@@ -557,12 +548,7 @@ export function ExpenseSummary({ activeCurrency = null }: ExpenseSummaryProps) {
                   <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-emerald-100/50 blur-3xl" />
                   <div className="relative">
                     <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-                      <div>
-                        <h3 className="text-lg font-semibold text-slate-950">Saldo disponible por día</h3>
-                        <p className="mt-1 text-sm text-slate-500">
-                          Seguimos el último saldo informado de cada fecha para ver la respiración real de la cuenta.
-                        </p>
-                      </div>
+                      <h3 className="text-lg font-semibold text-slate-950">Saldo disponible por día</h3>
                       {latestBalance !== null ? (
                         <div className="rounded-[1.2rem] border border-emerald-100 bg-emerald-50/80 px-4 py-3 text-sm text-emerald-800 shadow-sm">
                           Último registro: <span className="font-semibold">{formatMoney(latestBalance)}</span>
@@ -587,12 +573,7 @@ export function ExpenseSummary({ activeCurrency = null }: ExpenseSummaryProps) {
                   <div className="absolute left-0 top-0 h-32 w-32 rounded-full bg-rose-100/45 blur-3xl" />
                   <div className="relative">
                     <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                      <div>
-                        <h3 className="text-lg font-semibold text-slate-950">Comparativa ingreso vs gasto</h3>
-                        <p className="mt-1 text-sm text-slate-500">
-                          Verde para entradas, rojo para salidas. El contraste permite detectar los días donde la caja se tensó.
-                        </p>
-                      </div>
+                      <h3 className="text-lg font-semibold text-slate-950">Comparativa ingreso vs gasto</h3>
                       <div className="flex flex-wrap gap-2 text-xs font-medium">
                         <span className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-emerald-700">
                           <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
@@ -621,9 +602,7 @@ export function ExpenseSummary({ activeCurrency = null }: ExpenseSummaryProps) {
                         {isProfit ? 'Período en profit' : 'Período en pérdida'}
                       </p>
                       <p className="mt-2 text-sm leading-6 text-slate-700">
-                        {isProfit
-                          ? `Terminaste el período con ${formatMoney(netResult)} a favor.`
-                          : `Terminaste el período gastando ${formatMoney(Math.abs(netResult))} más de lo que ingresó.`}
+                        {isProfit ? `Neto ${formatMoney(netResult)}` : `Neto -${formatMoney(Math.abs(netResult))}`}
                       </p>
                     </div>
                     <div className="rounded-[1.2rem] bg-white/90 px-4 py-3 shadow-sm">
