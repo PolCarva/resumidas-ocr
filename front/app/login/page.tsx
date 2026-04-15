@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authService } from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
+import { AuthShell } from '@/components/auth/auth-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -42,109 +43,74 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="page-shell pb-10">
-      <div className="page-section">
-        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <section className="surface-card relative overflow-hidden p-6 sm:p-8">
-            <div className="absolute -left-12 top-0 h-36 w-36 rounded-full bg-sky-100/70 blur-3xl" />
-            <div className="absolute -right-10 bottom-0 h-28 w-28 rounded-full bg-emerald-100/60 blur-3xl" />
+    <AuthShell
+      modeLabel="Iniciar sesión"
+      description="Entrá para seguir viendo tus análisis, tus categorías y tus archivos sin dar vueltas."
+      footer={(
+        <p>
+          ¿No tenés cuenta?{' '}
+          <Link href="/register" className="auth-link">
+            Creala
+          </Link>
+        </p>
+      )}
+    >
+      <div className="auth-form-block">
+        {error && (
+          <div className="auth-alert mb-4">
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
 
-            <div className="relative">
-              <span className="section-label">Acceso seguro</span>
-              <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-                Inicia sesión para continuar con tus análisis.
-              </h1>
-              <p className="mt-3 max-w-xl text-base leading-7 text-slate-600">
-                Recupera tus extractos procesados, revisa categorías y mantén tu historial ordenado en un entorno visual más claro.
-              </p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-600">
+              Correo electrónico
+            </Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="nombre@correo.com"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="auth-input w-full"
+            />
+          </div>
 
-              <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                <div className="surface-card-soft p-4">
-                  <p className="text-sm font-semibold text-slate-900">Historial listo</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">Vuelve a abrir análisis anteriores sin cambiar el flujo que ya conoces.</p>
-                </div>
-                <div className="surface-card-soft p-4">
-                  <p className="text-sm font-semibold text-slate-900">Lectura más clara</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">Mejor jerarquía para entender estados, acciones y próximos pasos.</p>
-                </div>
-              </div>
-            </div>
-          </section>
+          <div className="space-y-2">
+            <Label htmlFor="password" className="text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-600">
+              Contraseña
+            </Label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className="auth-input w-full"
+            />
+          </div>
 
-          <section className="surface-card p-6 sm:p-8">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Bienvenido de nuevo</p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">Iniciar sesión</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-500">Accede con el mismo proceso de autenticación, ahora con una estructura visual más limpia.</p>
-            </div>
-
-            {error && (
-              <div className="mt-6 rounded-[1.25rem] border border-red-200/80 bg-red-50/90 p-4">
-                <p className="text-sm text-red-700">{error}</p>
-              </div>
+          <Button
+            type="submit"
+            disabled={loading}
+            className="h-12 w-full rounded-[1.1rem] bg-slate-950 text-[0.95rem] text-white shadow-[0_28px_44px_-24px_rgba(15,23,42,0.82)] hover:bg-slate-800 hover:shadow-[0_32px_50px_-24px_rgba(15,23,42,0.88)]"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Entrando...
+              </>
+            ) : (
+              'Entrar'
             )}
-
-            <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="email">Correo electrónico</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="tu@email.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-4">
-                  <Label htmlFor="password">Contraseña</Label>
-                  <Link href="#" className="text-sm font-medium text-sky-700 hover:text-sky-800">
-                    ¿Olvidaste tu contraseña?
-                  </Link>
-                </div>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  className="w-full"
-                />
-              </div>
-
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Iniciando sesión...
-                  </>
-                ) : (
-                  'Iniciar Sesión'
-                )}
-              </Button>
-            </form>
-
-            <div className="mt-6 border-t border-slate-200/80 pt-5 text-center">
-              <p className="text-slate-600">
-                ¿No tienes una cuenta?{' '}
-                <Link href="/register" className="font-medium text-sky-700 hover:text-sky-800">
-                  Regístrate
-                </Link>
-              </p>
-            </div>
-          </section>
-        </div>
+          </Button>
+        </form>
       </div>
-    </main>
+    </AuthShell>
   );
 } 

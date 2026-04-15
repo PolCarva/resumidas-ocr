@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { ReactNode } from "react";
 import { Navbar } from "@/components/navbar";
+import { cn } from "@/lib/utils";
 
 interface AppShellProps {
   children: ReactNode;
@@ -11,12 +12,18 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
-  const hideFooter = pathname === "/";
+  const isImmersivePage = pathname === "/" || pathname === "/login" || pathname === "/register";
+  const hideFooter = isImmersivePage;
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-dvh flex-col">
       <Navbar />
-      <main className="flex-grow pt-4 sm:pt-6">
+      <main
+        className={cn(
+          "flex min-h-0 flex-1 flex-col",
+          isImmersivePage ? "pt-0" : "pt-4 sm:pt-6"
+        )}
+      >
         {children}
       </main>
       {!hideFooter ? (

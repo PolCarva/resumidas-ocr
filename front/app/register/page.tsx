@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authService } from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
+import { AuthShell } from '@/components/auth/auth-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,14 +35,12 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
 
-    // Validar que las contraseñas coincidan
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden');
       setLoading(false);
       return;
     }
 
-    // Validar que se hayan aceptado los términos y condiciones
     if (!acceptTerms) {
       setError('Debes aceptar los términos y condiciones para continuar');
       setLoading(false);
@@ -49,8 +48,11 @@ export default function RegisterPage() {
     }
 
     try {
-      // Eliminar confirmPassword antes de enviar
-      const {...userData } = formData;
+      const userData = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      };
       const data = await authService.register(userData);
       login(data.token, data.user);
       router.push('/expenses');
@@ -62,169 +64,134 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="page-shell pb-10">
-      <div className="page-section">
-        <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
-          <section className="surface-card relative overflow-hidden p-6 sm:p-8">
-            <div className="absolute -left-12 top-0 h-36 w-36 rounded-full bg-emerald-100/70 blur-3xl" />
-            <div className="absolute -right-10 bottom-0 h-28 w-28 rounded-full bg-sky-100/65 blur-3xl" />
+    <AuthShell
+      modeLabel="Crear cuenta"
+      description="Creá tu cuenta para guardar resúmenes, volver a tus archivos y tener todo en el mismo lugar."
+      footer={(
+        <p>
+          ¿Ya tenés cuenta?{' '}
+          <Link href="/login" className="auth-link">
+            Iniciá sesión
+          </Link>
+        </p>
+      )}
+    >
+      <div className="auth-form-block">
+        {error && (
+          <div className="auth-alert mb-4">
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
 
-            <div className="relative">
-              <span className="section-label">Nueva cuenta</span>
-              <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-                Crea tu espacio para analizar gastos con más claridad.
-              </h1>
-              <p className="mt-3 max-w-xl text-base leading-7 text-slate-600">
-                Mantén el mismo proceso de registro y consentimiento, con una experiencia visual más limpia para completar el formulario con menos fricción.
-              </p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name" className="text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-600">
+              Nombre
+            </Label>
+            <Input
+              id="name"
+              name="name"
+              type="text"
+              placeholder="Tu nombre"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              className="auth-input w-full"
+            />
+          </div>
 
-              <div className="mt-8 grid gap-3">
-                <div className="surface-card-soft p-4">
-                  <p className="text-sm font-semibold text-slate-900">Biblioteca personal</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">Guarda análisis, vuelve a consultarlos y renómbralos cuando lo necesites.</p>
-                </div>
-                <div className="surface-card-soft p-4">
-                  <p className="text-sm font-semibold text-slate-900">Cifrado y control</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">Tus datos se procesan con el mismo flujo actual y permanecen protegidos.</p>
-                </div>
-              </div>
-            </div>
-          </section>
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-600">
+              Correo electrónico
+            </Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="nombre@correo.com"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="auth-input w-full"
+            />
+          </div>
 
-          <section className="surface-card p-6 sm:p-8">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Únete a la plataforma</p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">Crear Cuenta</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-500">Regístrate con el mismo flujo actual, ahora con mejor jerarquía y ritmo visual.</p>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="password" className="text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-600">
+              Contraseña
+            </Label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="Mínimo 8 caracteres"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              minLength={8}
+              className="auth-input w-full"
+            />
+          </div>
 
-            {error && (
-              <div className="mt-6 rounded-[1.25rem] border border-red-200/80 bg-red-50/90 p-4">
-                <p className="text-sm text-red-700">{error}</p>
-              </div>
-            )}
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword" className="text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-slate-600">
+              Repetir contraseña
+            </Label>
+            <Input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              placeholder="Repetí tu contraseña"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              minLength={8}
+              className="auth-input w-full"
+            />
+          </div>
 
-            <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nombre completo</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  type="text"
-                  placeholder="Tu nombre"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Correo electrónico</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="tu@email.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full"
-                />
-              </div>
-
-              <div className="grid gap-5 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="password">Contraseña</Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                    minLength={8}
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
-                  <Input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    placeholder="••••••••"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    required
-                    minLength={8}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-
-              <div className="rounded-[1.25rem] border border-slate-200/80 bg-slate-50/80 p-4">
-                <div className="flex items-start space-x-3">
-                  <Checkbox
-                    id="terms"
-                    checked={acceptTerms}
-                    onCheckedChange={(checked) => setAcceptTerms(checked === true)}
-                    className="mt-1"
-                    required
-                  />
-                  <div className="grid gap-2 leading-none">
-                    <label
-                      htmlFor="terms"
-                      className="text-sm font-medium leading-6 text-slate-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      He leído y acepto los{' '}
-                      <Link href="/terms" className="font-medium text-sky-700 underline" target="_blank">
-                        Términos y Condiciones
-                      </Link>{' '}
-                      y la{' '}
-                      <Link href="/privacy" className="font-medium text-sky-700 underline" target="_blank">
-                        Política de Privacidad
-                      </Link>
-                    </label>
-                    <p className="text-xs leading-5 text-slate-500">
-                      Al registrarte, aceptas que tus datos sean procesados según nuestra política de privacidad.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full"
+          <div className="auth-note">
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="terms"
+                checked={acceptTerms}
+                onCheckedChange={(checked) => setAcceptTerms(checked === true)}
+                className="mt-1 h-5 w-5 rounded-[0.7rem] border-slate-300 bg-white/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]"
+                required
+              />
+              <label
+                htmlFor="terms"
+                className="text-sm leading-6 text-slate-700"
               >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creando cuenta...
-                  </>
-                ) : (
-                  'Registrarse'
-                )}
-              </Button>
-            </form>
-
-            <div className="mt-6 border-t border-slate-200/80 pt-5 text-center">
-              <p className="text-slate-600">
-                ¿Ya tienes una cuenta?{' '}
-                <Link href="/login" className="font-medium text-sky-700 hover:text-sky-800">
-                  Iniciar sesión
+                Acepto los{' '}
+                <Link href="/terms" className="auth-link" target="_blank" rel="noreferrer">
+                  Términos y Condiciones
+                </Link>{' '}
+                y la{' '}
+                <Link href="/privacy" className="auth-link" target="_blank" rel="noreferrer">
+                  Política de Privacidad
                 </Link>
-              </p>
+                .
+              </label>
             </div>
-            <p className="mt-4 text-xs leading-6 text-slate-500">
-              Los datos de tu cuenta están encriptados y no son accesibles para terceros.
-            </p>
-          </section>
-        </div>
+          </div>
+
+          <Button
+            type="submit"
+            disabled={loading}
+            className="h-12 w-full rounded-[1.1rem] bg-slate-950 text-[0.95rem] text-white shadow-[0_28px_44px_-24px_rgba(15,23,42,0.82)] hover:bg-slate-800 hover:shadow-[0_32px_50px_-24px_rgba(15,23,42,0.88)]"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creando cuenta...
+              </>
+            ) : (
+              'Crear cuenta'
+            )}
+          </Button>
+        </form>
       </div>
-    </main>
+    </AuthShell>
   );
 } 

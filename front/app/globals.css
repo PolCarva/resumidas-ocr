@@ -128,11 +128,11 @@
 
 @layer components {
   .page-shell {
-    @apply relative overflow-hidden;
+    @apply relative overflow-visible;
   }
 
   .page-section {
-    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+    @apply mx-auto w-full 2xl:max-w-6xl px-4 sm:px-6 lg:px-8;
   }
 
   .surface-card {
@@ -191,5 +191,101 @@
     @apply rounded-[1.5rem] border p-5 shadow-[0_18px_36px_-30px_rgba(120,53,15,0.35)];
     border-color: rgba(253, 230, 138, 0.7);
     background-color: rgba(255, 251, 235, 0.9);
+  }
+
+  .auth-scene {
+    @apply relative isolate overflow-hidden rounded-[2.75rem];
+  }
+
+  .auth-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(to right, rgba(15, 23, 42, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(15, 23, 42, 0.08) 1px, transparent 1px),
+      radial-gradient(circle, rgba(15, 23, 42, 0.08) 0.8px, transparent 0.9px);
+    background-size: 42px 42px, 42px 42px, 14px 14px;
+    mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.9), transparent 82%);
+    opacity: 0.5;
+  }
+
+  .auth-panel {
+    @apply relative overflow-hidden rounded-[2rem] border p-6 shadow-[0_42px_110px_-50px_rgba(15,23,42,0.62)] backdrop-blur-2xl sm:p-8;
+    border-color: rgba(255, 255, 255, 0.58);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.58));
+  }
+
+  .auth-form-block {
+    @apply rounded-[1.6rem] border p-5 shadow-[0_24px_50px_-34px_rgba(15,23,42,0.5)] backdrop-blur-xl sm:p-6;
+    border-color: rgba(255, 255, 255, 0.52);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.42));
+  }
+
+  .auth-brand {
+    @apply inline-flex items-center gap-3 rounded-full border px-4 py-2 text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-slate-700;
+    border-color: rgba(255, 255, 255, 0.54);
+    background-color: rgba(255, 255, 255, 0.42);
+    box-shadow: 0 16px 30px -24px rgba(15, 23, 42, 0.46);
+  }
+
+  .auth-brand-mark {
+    height: 0.7rem;
+    width: 0.7rem;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 1), rgba(15, 23, 42, 0.95));
+    box-shadow: 0 0 0 4px rgba(186, 230, 253, 0.6);
+  }
+
+  .auth-display {
+    font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", ui-serif, Georgia, Cambria, "Times New Roman", serif;
+    letter-spacing: -0.06em;
+    line-height: 0.92;
+    text-wrap: balance;
+  }
+
+  .auth-input {
+    @apply h-12 rounded-[1.1rem] border px-4 text-[0.95rem] text-slate-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.82),0_22px_30px_-28px_rgba(15,23,42,0.6)] placeholder:text-slate-400 focus-visible:border-sky-300 focus-visible:ring-4 focus-visible:ring-sky-100/90;
+    border-color: rgba(148, 163, 184, 0.42);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.8));
+  }
+
+  .auth-note {
+    @apply rounded-[1.2rem] border p-4 shadow-[0_20px_36px_-34px_rgba(15,23,42,0.52)];
+    border-color: rgba(148, 163, 184, 0.24);
+    background-color: rgba(255, 255, 255, 0.72);
+  }
+
+  .auth-alert {
+    @apply rounded-[1.1rem] border px-4 py-3 shadow-[0_18px_30px_-26px_rgba(220,38,38,0.35)];
+    border-color: rgba(254, 202, 202, 0.95);
+    background-color: rgba(254, 242, 242, 0.9);
+  }
+
+  .auth-link {
+    @apply font-medium text-slate-900 underline decoration-slate-300 underline-offset-4 transition-colors hover:text-sky-800 hover:decoration-sky-300;
+  }
+
+  .analysis-dropzone::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at top left, rgba(125, 211, 252, 0.28), transparent 16rem),
+      radial-gradient(circle at bottom right, rgba(250, 204, 21, 0.16), transparent 14rem),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 26%);
+    pointer-events: none;
+  }
+
+  .analysis-dropzone-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(to right, rgba(15, 23, 42, 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(15, 23, 42, 0.06) 1px, transparent 1px);
+    background-size: 34px 34px;
+    mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.76), transparent 82%);
+    opacity: 0.42;
   }
 }

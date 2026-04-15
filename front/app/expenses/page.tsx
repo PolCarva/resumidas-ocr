@@ -6,7 +6,7 @@ import { ExpenseTable } from "@/components/expense-table"
 import { useExpenseStore } from "@/store/expenses";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
 import {
@@ -281,10 +281,10 @@ export default function ExpensesPage() {
       )}
       
       {isLoading ? (
-        <div className="surface-card flex items-center justify-center py-16">
+        <div className="surface-card flex h-64 items-center justify-center">
           <div className="flex flex-col items-center gap-4">
-            <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
-            <p className="text-sm font-medium text-slate-500">Cargando información financiera...</p>
+            <Loader2 className="h-8 w-8 animate-spin text-sky-600" />
+            <span className="text-lg text-slate-600">Cargando datos...</span>
           </div>
         </div>
       ) : (

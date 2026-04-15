@@ -606,7 +606,7 @@ export default function AnalysisHistoryPage() {
           <div className="surface-card flex h-64 items-center justify-center">
             <div className="flex flex-col items-center gap-4">
               <Loader2 className="h-8 w-8 animate-spin text-sky-600" />
-              <span className="text-lg text-slate-600">Cargando historial...</span>
+              <span className="text-lg text-slate-600">Cargando datos...</span>
             </div>
           </div>
         ) : analyses.length === 0 ? (

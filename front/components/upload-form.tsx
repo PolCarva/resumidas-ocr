@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect, useRef } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useDropzone } from "react-dropzone"
 import { Upload, FileText, ArrowRight, Loader2, AlertCircle, Lock, Sparkles, FileDigit } from "lucide-react"
@@ -358,13 +359,13 @@ export function UploadForm() {
     >
       <div className="space-y-4">
         {!isAuthenticated && (
-          <Alert>
+          <Alert className="border-white/60 bg-white/72 backdrop-blur-xl">
             <AlertCircle className="h-4 w-4 text-amber-600" />
             <AlertDescription className="text-amber-800">
               Debes iniciar sesión para analizar extractos bancarios.{" "}
               <Button
                 variant="link"
-                className="h-auto p-0 font-semibold text-amber-800 underline"
+                className="h-auto p-0 font-semibold text-amber-900 underline decoration-amber-300 underline-offset-4"
                 onClick={() => router.push('/login')}
               >
                 Iniciar sesión
@@ -374,7 +375,7 @@ export function UploadForm() {
         )}
 
         {error && (
-          <Alert variant="destructive">
+          <Alert variant="destructive" className="border-red-200/90 bg-red-50/82 backdrop-blur-xl">
             <AlertCircle className="h-4 w-4 text-red-600" />
             <AlertDescription className="text-red-800">
               Hubo un error al procesar el archivo.
@@ -414,7 +415,7 @@ export function UploadForm() {
         )}
 
         {wasJsonRepaired && !error ? (
-          <Alert variant="warning">
+          <Alert variant="warning" className="border-amber-200/85 bg-amber-50/84 backdrop-blur-xl">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               Se reparó automáticamente el formato de la respuesta.
@@ -423,7 +424,7 @@ export function UploadForm() {
         ) : null}
 
         {modelInfo && !error ? (
-          <Alert>
+          <Alert className="border-sky-100/90 bg-sky-50/80 backdrop-blur-xl">
             <Sparkles className="h-4 w-4 text-blue-600" />
             <AlertDescription className="text-blue-800">
               Análisis realizado con <span className="font-semibold">{modelInfo}</span>.
@@ -432,7 +433,7 @@ export function UploadForm() {
         ) : null}
 
         {pagesInfo && !error && analysisState !== AnalysisState.COMPLETED ? (
-          <Alert>
+          <Alert className="border-sky-100/90 bg-sky-50/80 backdrop-blur-xl">
             <FileDigit className="h-4 w-4 text-blue-600" />
             <AlertDescription className="text-blue-800">
               Página {pagesInfo.processed} de {pagesInfo.total}.
@@ -440,59 +441,68 @@ export function UploadForm() {
           </Alert>
         ) : null}
 
-        <div
-          {...getRootProps()}
-          className={`
-            group relative overflow-hidden rounded-[2rem] border p-10 text-center transition-all duration-300 sm:p-12
-            ${!isAuthenticated ? 'pointer-events-none opacity-60' : ''}
-            ${isDragActive && isAuthenticated
-              ? "border-sky-400 bg-[linear-gradient(135deg,rgba(219,234,254,0.92),rgba(239,246,255,0.98))] shadow-[0_28px_60px_-34px_rgba(14,165,233,0.35)]"
-              : "border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(248,250,252,0.92))] shadow-[0_28px_70px_-42px_rgba(15,23,42,0.42)]"
+        {isAuthenticated ? (
+          <div
+            {...getRootProps()}
+            className={`
+            analysis-dropzone group relative cursor-pointer overflow-hidden rounded-[1.9rem] border p-8 text-center transition-all duration-300 sm:p-10
+            ${isDragActive
+              ? "border-sky-300 bg-[linear-gradient(140deg,rgba(240,249,255,0.96),rgba(224,242,254,0.88))] shadow-[0_34px_64px_-36px_rgba(14,165,233,0.38)]"
+              : "border-white/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(255,255,255,0.54))] shadow-[0_30px_70px_-42px_rgba(15,23,42,0.48)] backdrop-blur-xl"
             }
           `}
-        >
-          <input {...getInputProps()} />
-          <div className="absolute inset-0 bg-grid-soft opacity-60" />
+          >
+            <input {...getInputProps()} />
+            <div className="analysis-dropzone-grid" />
 
-          {!isAuthenticated ? (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-100/70 backdrop-blur-sm">
-              <div className="flex flex-col items-center">
-                <Lock className="mb-2 h-8 w-8 text-slate-500" />
-                <p className="font-medium text-slate-700">Inicia sesión para subir archivos</p>
-              </div>
-            </div>
-          ) : null}
-
-          {isDragActive && isAuthenticated ? (
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="relative flex flex-col items-center"
-            >
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-sky-100 text-sky-700">
-                <Upload className="h-8 w-8" />
-              </div>
-              <h2 className="text-2xl font-semibold tracking-tight text-sky-800">Suelta el archivo</h2>
-            </motion.div>
-          ) : (
-            <div className="relative flex flex-col items-center">
-              <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition group-hover:bg-slate-950 group-hover:text-white">
-                <Upload className="h-8 w-8" />
-              </div>
-              <h2 className="text-2xl font-semibold tracking-tight text-slate-950">Sube tu extracto</h2>
-              <p className="mt-2 text-sm text-slate-500">PDF o imagen</p>
-              {file ? (
-                <div className="mt-5 flex items-center justify-center gap-2 rounded-full border border-sky-100 bg-sky-50 px-4 py-2 text-sm font-medium text-sky-700">
-                  <FileText className="h-4 w-4" />
-                  {file.name}
+            {isDragActive ? (
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="relative flex flex-col items-center"
+              >
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-sky-100/90 text-sky-700 shadow-[0_20px_36px_-24px_rgba(14,165,233,0.34)]">
+                  <Upload className="h-8 w-8" />
                 </div>
-              ) : null}
+                <h2 className="auth-display text-[2rem] text-sky-900">Suelta el archivo</h2>
+              </motion.div>
+            ) : (
+              <div className="relative flex flex-col items-center">
+                <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-white/86 text-slate-700 shadow-[0_20px_34px_-24px_rgba(15,23,42,0.38)] transition group-hover:bg-slate-950 group-hover:text-white">
+                  <Upload className="h-8 w-8" />
+                </div>
+                <h2 className="auth-display text-[2.3rem] text-slate-950">Sube tu extracto</h2>
+                <p className="mt-2 text-sm uppercase tracking-[0.2em] text-slate-500">PDF o imagen</p>
+                {file ? (
+                  <div className="mt-5 flex items-center justify-center gap-2 rounded-full border border-sky-100/90 bg-sky-50/86 px-4 py-2 text-sm font-medium text-sky-700 shadow-[0_18px_32px_-24px_rgba(14,165,233,0.32)]">
+                    <FileText className="h-4 w-4" />
+                    {file.name}
+                  </div>
+                ) : null}
+              </div>
+            )}
+          </div>
+        ) : (
+          <Link
+            href="/"
+            aria-label="Ir al inicio"
+            className="analysis-dropzone group relative block cursor-pointer overflow-hidden rounded-[1.9rem] border border-white/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(255,255,255,0.54))] p-8 text-center shadow-[0_30px_70px_-42px_rgba(15,23,42,0.48)] backdrop-blur-xl transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600 sm:p-10"
+          >
+            <div className="analysis-dropzone-grid" />
+            <div className="relative z-10 mx-auto flex min-h-[220px] w-full max-w-md flex-col items-center justify-center rounded-[1.35rem] px-6 py-10">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/90 text-slate-600 shadow-[0_16px_32px_-20px_rgba(15,23,42,0.35)]">
+                <Lock className="h-8 w-8" />
+              </div>
+              <p className="auth-display text-center text-[1.35rem] leading-snug text-slate-800 sm:text-[1.5rem]">
+                Inicia sesión para subir archivos
+              </p>
+              <p className="mt-3 text-sm uppercase tracking-[0.18em] text-slate-500">PDF o imagen</p>
             </div>
-          )}
-        </div>
+          </Link>
+        )}
 
         {loading ? (
-          <div className="surface-card-soft space-y-3 p-4">
+          <div className="auth-note space-y-3">
             <div className="flex items-center justify-between">
               <motion.div
                 key={analysisMessage || getStatusMessage()}
@@ -524,12 +534,12 @@ export function UploadForm() {
           onClick={handleSubmit}
           disabled={!file || loading || !isAuthenticated}
           className={`
-            w-full py-6 text-lg font-medium
+            h-12 w-full rounded-[1.1rem] text-[0.95rem]
             ${!file || !isAuthenticated
-              ? "bg-slate-200 text-slate-500"
+              ? "bg-slate-200/90 text-slate-500 shadow-none hover:bg-slate-200/90"
               : analysisState === AnalysisState.COMPLETED
-                ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700"
-                : "bg-gradient-to-r from-slate-950 via-slate-900 to-sky-700 text-white hover:from-slate-900 hover:to-sky-800"
+                ? "bg-emerald-600 text-white shadow-[0_28px_44px_-24px_rgba(16,185,129,0.45)] hover:bg-emerald-700 hover:shadow-[0_32px_50px_-24px_rgba(16,185,129,0.5)]"
+                : "bg-slate-950 text-white shadow-[0_28px_44px_-24px_rgba(15,23,42,0.82)] hover:bg-slate-800 hover:shadow-[0_32px_50px_-24px_rgba(15,23,42,0.88)]"
             }
           `}
         >
